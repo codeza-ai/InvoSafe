@@ -12,15 +12,12 @@ export default function Page() {
       </div>
       <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
         <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-2/5 md:px-20">
-          <div
-            className={styles.shape}
-          />
+          <h1 className={`text-3xl font-bold text-gray-800 md:text-5xl`}>
+            Welcome to <br />
+            <span className="text-blue-500">Vyayam</span>
+          </h1>
           <p className={`text-xl text-gray-800 md:text-3xl md:leading-normal`}>
-            <strong>Welcome to Vyayam.</strong> This is the example for the{' '}
-            <a href="https://nextjs.org/learn/" className="text-blue-500">
-              Next.js Learn Course
-            </a>
-            , brought to you by Vercel.
+            Invoices Made Easy.
           </p>
           <Link
             href="/login"
