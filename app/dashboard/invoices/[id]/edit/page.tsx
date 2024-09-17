@@ -5,12 +5,11 @@ import { notFound } from 'next/navigation';
 
 export default async function Page({ params }: { params: { id: string } }) {
     const id = params.id;
-    try {
-        const [invoice, customers] = await Promise.all([
-            fetchInvoiceById(id),
-            fetchCustomers(),
-        ]);
-    }catch (error) {
+    const [invoice, customers] = await Promise.all([
+        fetchInvoiceById(id),
+        fetchCustomers(),
+    ]);
+    if(!invoice) {
         return notFound();
     }
     return (
