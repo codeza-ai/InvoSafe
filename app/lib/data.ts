@@ -154,7 +154,7 @@ export async function fetchInvoiceById(id: string) {
 
     const invoice = data.rows.map((invoice) => ({
       ...invoice,
-      // Convert amount from cents to dollars
+      // Convert amount from rupee to paisa
       amount: invoice.amount / 100,
     }));
 
