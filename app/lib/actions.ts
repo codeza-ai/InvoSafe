@@ -1,5 +1,5 @@
 'use server';
-// This are server side actions that can be called from the client side
+
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
@@ -14,7 +14,7 @@ const FormSchema = z.object({
   }),
   amount: z.coerce
     .number()
-    .gt(0, { message: 'Please enter an amount greater than $0.' }),
+    .gt(0, { message: 'Please enter an amount greater than 0.' }),
   status: z.enum(['pending', 'paid'], {
     invalid_type_error: 'Please select an invoice status.',
   }),
@@ -22,8 +22,7 @@ const FormSchema = z.object({
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
-const UpdateInvoice = FormSchema.omit({ id: true, date: true });
-
+const UpdateInvoice = FormSchema.omit({ date: true, id: true });
 
 export type State = {
   errors?: {
@@ -34,35 +33,44 @@ export type State = {
   message?: string | null;
 };
 
-export async function createInvoice(prevState: State, formData: FormData){
-    const { customerId, amount, status } = CreateInvoice.parse({
+export async function createInvoice(prevState: State, formData: FormData) {
+  // Validate form fields using Zod
+  const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
-  const amountInCents = amount * 100;
-  const date = new Date().toISOString().split('T')[0];
 
-  try{
-    await sql`
-    INSERT INTO invoices (customer_id, amount, status, date)
-    VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-  `;
-  }
-  catch(createError){
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
     return {
-      message: 'Database Error: Failed to Create Invoice.',
-      error : createError
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Invoice.',
     };
   }
 
-  revalidatePath('/dashboard/invoices');//Clears the cache for the invoices page
-  // Revalidates the cache for the invoices page after 5 seconds
+  // Prepare data for insertion into the database
+  const { customerId, amount, status } = validatedFields.data;
+  const amountInPaisa = amount * 100;
+  const date = new Date().toISOString().split('T')[0];
 
+  // Insert data into the database
+  try {
+    await sql`
+      INSERT INTO invoices (customer_id, amount, status, date)
+      VALUES (${customerId}, ${amountInPaisa}, ${status}, ${date})
+    `;
+  } catch (error) {
+    // If a database error occurs, return a more specific error.
+    return {
+      message: 'Database Error: Failed to Create Invoice.',
+    };
+  }
+
+  // Revalidate the cache for the invoices page and redirect the user.
+  revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
-  // Redirects the user to the invoices page
 }
-
 
 export async function updateInvoice(
   id: string,
@@ -74,46 +82,41 @@ export async function updateInvoice(
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
- 
+
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Update Invoice.',
     };
   }
- 
+
   const { customerId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
- 
+  const amountInPaisa = amount * 100;
+
   try {
     await sql`
       UPDATE invoices
-      SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+      SET customer_id = ${customerId}, amount = ${amountInPaisa}, status = ${status}
       WHERE id = ${id}
     `;
-  } catch (updateError) {
-    return { message: 'Database Error: Failed to Update Invoice.', error: updateError };
+  } catch (error) {
+    return { message: 'Database Error: Failed to Update Invoice.' };
   }
- 
+
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
 
 export async function deleteInvoice(id: string) {
-  try{
+  // throw new Error('Failed to Delete Invoice');
+
+  try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');
+    return { message: 'Deleted Invoice' };
+  } catch (error) {
+    return { message: 'Database Error: Failed to Delete Invoice.' };
   }
-  catch(deleteError){
-    return {
-      message: 'Database Error: Failed to Delete Invoice.',
-      error : deleteError
-    };
-  }
-
-  // Since this action is being called in the /dashboard/invoices path, 
-  // you don't need to call redirect. Calling revalidatePath will trigger 
-  // a new server request and re-render the table.
 }
 
 export async function authenticate(
@@ -122,15 +125,15 @@ export async function authenticate(
 ) {
   try {
     await signIn('credentials', formData);
-  } catch (authError) {
-    if (authError instanceof AuthError) {
-      switch (authError.type) {
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
         case 'CredentialsSignin':
           return 'Invalid credentials.';
         default:
           return 'Something went wrong.';
       }
     }
-    throw authError;
+    throw error;
   }
 }
