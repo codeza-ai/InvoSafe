@@ -6,8 +6,8 @@ import {
   CheckIcon,
   ClockIcon,
   UserCircleIcon,
+  CurrencyRupeeIcon
 } from '@heroicons/react/24/outline';
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import { Button } from '@/app/ui/button';
 import { createInvoice, State } from '@/app/lib/actions';
 import { useActionState } from 'react';
@@ -19,10 +19,13 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
   return (
     <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
+        <div className='mb-4 text-[12px] bg-[#FF9955] text-white rounded-md p-2 w-fit'>
+          Fields that are marked ' <span className='text-red-500'>*</span> ' are required.
+        </div>
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Choose customer
+            Choose customer<span className='text-red-500'>*</span>
           </label>
           <div className="relative">
             <select
@@ -56,7 +59,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
         {/* Invoice Amount */}
         <div className="mb-4">
           <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-            Choose an amount
+            Choose an amount<span className='text-red-500'>*</span>
           </label>
           <div className="relative mt-2 rounded-md">
             <div className="relative">
@@ -65,7 +68,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                 name="amount"
                 type="number"
                 step="0.01"
-                placeholder="Enter USD amount"
+                placeholder="Enter amount..."
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                 required
               />
@@ -78,7 +81,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
         {/* Invoice Status */}
         <fieldset>
           <legend className="mb-2 block text-sm font-medium">
-            Set the invoice status
+            Set the invoice status<span className='text-red-500'>*</span>
           </legend>
           <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
             <div className="flex gap-4">
