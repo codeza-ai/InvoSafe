@@ -1,10 +1,10 @@
 import VyayamLogo from '@/app/ui/vyayam-logo';
-import LoginForm from '@/app/ui/login-form';
+import SignupForm from '@/app/ui/signup-form';
 import { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: 'Login',
+    title: 'Sign Up',
 };
 
 export default function LoginPage() {
@@ -16,7 +16,7 @@ export default function LoginPage() {
                         <VyayamLogo />
                     </Link>
                 </div>
-                <LoginForm />
+                <SignupForm />
             </div>
         </main>
     );
