@@ -9,9 +9,13 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from './button';
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
 
 export default function LoginForm() {
+  useEffect(()=>{
+    alert('Use the credentials to login\n\nEmail - user@vyayam.com\nPassword - vyayam#rocks');
+  }, []);
+
   const [errorMessage, formAction, isPending] = useActionState(
     authenticate,
     undefined,
