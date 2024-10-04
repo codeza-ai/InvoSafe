@@ -20,7 +20,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
     <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         <div className='mb-4 text-[12px] bg-[#FF9955] text-white rounded-md p-2 w-fit'>
-          Fields that are marked ' <span className='text-red-500'>*</span> ' are required.
+          Fields that are marked <span className='text-red-500'>*</span> are required.
         </div>
         {/* Customer Name */}
         <div className="mb-4">

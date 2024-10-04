@@ -216,3 +216,15 @@ export function InvoicesTableSkeleton() {
     </div>
   );
 }
+
+export function ProfileInfoSkeleton() {
+  return (
+    <div className="flex items-center gap-4">
+      <div className="h-16 w-16 rounded-full bg-gray-100"></div>
+      <div>
+        <div className="h-6 w-32 rounded bg-gray-100"></div>
+        <div className="mt-1 h-4 w-24 rounded bg-gray-100"></div>
+      </div>
+    </div>
+  );
+}
