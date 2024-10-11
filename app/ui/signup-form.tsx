@@ -4,6 +4,7 @@ import { lusitana } from '@/app/ui/fonts';
 import {
     AtSymbolIcon,
     KeyIcon,
+    IdentificationIcon
 } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from './button';
@@ -15,12 +16,12 @@ export default function SignupForm() {
         <form>
             <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
                 <h1 className={`${lusitana.className} mb-3 text-2xl`}>
-                    Please fill in your details to create an account.
+                    Join Vyayam
                 </h1>
                 <div className="w-full">
                     <div>
                         <label
-                            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+                            className="mb-3 mt-5 block font-medium text-gray-900 text-sm"
                             htmlFor="email"
                         >
                             Email
@@ -39,7 +40,7 @@ export default function SignupForm() {
                     </div>
                     <div>
                         <label
-                            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+                            className="mb-3 mt-5 block font-medium text-gray-900 text-sm"
                             htmlFor="email"
                         >
                             GST Number
@@ -53,12 +54,12 @@ export default function SignupForm() {
                                 placeholder="Enter your GST number"
                                 required
                             />
-                            <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                            <IdentificationIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
                         </div>
                     </div>
                     <div className="mt-4">
                         <label
-                            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+                            className="mb-3 mt-5 block font-medium text-gray-900 text-sm"
                             htmlFor="password"
                         >
                             Password
@@ -78,7 +79,7 @@ export default function SignupForm() {
                     </div>
                     <div className="mt-4">
                         <label
-                            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+                            className="mb-3 mt-5 block font-medium text-gray-900 text-sm"
                             htmlFor="cnf-password"
                         >
                             Confirm Password
