@@ -1,4 +1,3 @@
-
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 // import styles from '@/app/ui/home.module.css';
@@ -48,36 +47,48 @@ export default function Page() {
           </div>
         </div>
       </main>
-      <div className='h-auto flex justify-evenly md:flex-col'>
-        <div className='flex-1 p-10 text-3xl justify-center align-middle h-full'>
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius quae laboriosam earum voluptate perspiciatis eveniet. Odio tempora velit veritatis saepe!
-          </p>
-        </div>
-        <div className='flex-1 h-full align-middle p-10'>
-          <Image
-            src="/online_payments.png"
-            alt="Online Payments"
-            width={400}
-            height={200}
-          />
-        </div>
-      </div>
-      <div className='h-auto flex justify-evenly'>
-        <div className='flex-1 h-full align-middle p-10'>
-          <Image
-            src="/finance.png"
-            alt="Finance"
-            width={400}
-            height={200}
-          />
-        </div>
-        <div className='flex-1 p-10 text-3xl justify-center align-middle h-full'>
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius quae laboriosam earum voluptate perspiciatis eveniet. Odio tempora velit veritatis saepe!
-          </p>
+      <div className="container mx-auto px-10 py-12">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="md:w-1/2 space-y-6">
+            <h2 className="text-3xl font-bold text-gray-800">Easy Online Payments</h2>
+            <p className="text-xl text-gray-600">
+              Streamline your invoicing process with our user-friendly online payment system. Get paid faster and more efficiently than ever before.
+            </p>
+          </div>
+          <div className="md:w-1/2">
+            <Image
+              src="/online_payments.png"
+              alt="Online Payments"
+              width={450}
+              height={270}
+              className="w-full h-auto rounded-lg"
+            />
+          </div>
         </div>
       </div>
+      
+      <div className="bg-gray-100">
+        <div className="container mx-auto px-10 py-12">
+          <div className="flex flex-col md:flex-row-reverse items-center justify-between gap-12">
+            <div className="md:w-1/2 space-y-6">
+              <h2 className="text-3xl font-bold text-gray-800">Powerful Financial Insights</h2>
+              <p className="text-xl text-gray-600">
+                Gain valuable insights into your business finances with our advanced reporting and analytics tools. Make informed decisions to drive growth.
+              </p>
+            </div>
+            <div className="md:w-1/2">
+              <Image
+                src="/finance.png"
+                alt="Finance"
+                width={450}
+                height={270}
+                className="w-full h-auto rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <Footer/>
     </>
   );
