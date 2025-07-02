@@ -1,35 +1,36 @@
-# 🌐Vyayam
-Vyayam is  an all in one expense manager and tracker. Manage your invoices and expense track record easily in a unique and friendly way.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-This a full stack application made with NEXTjs and additional services provided by Vercel.
+## Getting Started
 
----
+First, run the development server:
 
-Checkout the app [here](https://vyayam-invoices.vercel.app)
-The credentials are -
-- Email - `user@vyayam.com`
-- Password - `vyayam#rocks`
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-Check the <mark>issues section</mark> to contribute to this amazing project
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-![Vyayam - Opengraph Image](/app/opengraph-image.png)
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## About the project
-I’ve built Vyayam, an intuitive invoice management app, using Next.js and a suite of amazing tools from Vercel. This project has been an incredible introduction to the Next.js framework and has helped me gain hands-on experience with industry-standard tools.
+## Learn More
 
-Here’s a quick rundown of the stack I used:
+To learn more about Next.js, take a look at the following resources:
 
-✨ NextAuth for seamless authentication
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-💾 Vercel Storage for managing data
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-💻 App Routing for organized navigation
+## Deploy on Vercel
 
-🎨 Tailwind CSS for sleek, responsive styling
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-🛠 Figma to craft the UI
-
-🧹 ESLint to ensure clean and efficient code
-
-Building Vyayam has been a fantastic learning experience, giving me insight into building real-world applications from the ground up. I’m looking forward to improving it further and would love to hear any feedback or suggestions you might have! 
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
