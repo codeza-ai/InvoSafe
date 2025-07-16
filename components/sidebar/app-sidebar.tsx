@@ -2,20 +2,24 @@
 
 import * as React from "react"
 import {
-    BookOpen,
-    Bot,
+    LayoutDashboard,
+    FileVolume,
+    FileClock,
+    FileWarning,
+    BadgeIndianRupee,
+    FileInput,
+    Files,
     Command,
-    Frame,
     LifeBuoy,
-    Map,
-    PieChart,
     Send,
-    Settings2,
-    SquareTerminal,
+    CircleUser,
+    Users,
+    UserPen,
+    UserSearch
 } from "lucide-react"
 
 import { NavMain } from "./nav-main"
-import { NavProjects } from "./nav-projects"
+// import { NavProjects } from "./nav-projects"
 import { NavSecondary } from "./nav-secondary"
 import { NavUser } from "./nav-user"
 import {
@@ -27,127 +31,89 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import Link from "next/link"
+import Logo from "../Logo"
 
 const data = {
     user: {
-        name: "shadcn",
-        email: "m@example.com",
+        name: "Darshan Odedara",
+        gstn: "22AAHFO1234F1Z5",
         avatar: "/avatars/shadcn.jpg",
     },
     navMain: [
         {
-            title: "Playground",
-            url: "#",
-            icon: SquareTerminal,
+            title: "Dashboard",
+            url: "/dashboard",
+            icon: LayoutDashboard,
             isActive: true,
+        },
+        {
+            title: "Invoices",
+            url: "/dashboard/invoices",
+            icon: Files,
             items: [
+                {
+                    title: "Payments",
+                    url: "/dashboard/invoices/payments",
+                    icon: BadgeIndianRupee,
+                },
+                {
+                    title: "Pending",
+                    url: "/dashboard/invoices/pending",
+                    icon: FileWarning,
+                },
+                {
+                    title: "Requests",
+                    url: "/dashboard/invoices/requests",
+                    icon: FileInput,
+                },
+                {
+                    title: "Sent",
+                    url: "/dashboard/invoices/sent",
+                    icon: FileVolume,
+                },
                 {
                     title: "History",
-                    url: "#",
-                },
-                {
-                    title: "Starred",
-                    url: "#",
-                },
-                {
-                    title: "Settings",
-                    url: "#",
-                },
+                    url: "/dashboard/invoices/history",
+                    icon: FileClock,
+                }
             ],
         },
         {
-            title: "Models",
-            url: "#",
-            icon: Bot,
+            title: "Users",
+            url: "/dashboard/users",
+            icon: Users,
             items: [
                 {
-                    title: "Genesis",
-                    url: "#",
+                    title: "Find User",
+                    url: "/dashboard/users/find_user",
+                    icon: UserSearch,
                 },
-                {
-                    title: "Explorer",
-                    url: "#",
-                },
-                {
-                    title: "Quantum",
-                    url: "#",
-                },
-            ],
+            ]
         },
         {
-            title: "Documentation",
-            url: "#",
-            icon: BookOpen,
+            title: "Profile",
+            url: "/dashboard/profile",
+            icon: CircleUser,
             items: [
                 {
-                    title: "Introduction",
-                    url: "#",
+                    title: "Update Profile",
+                    url: "/dashboard/profile/update",
+                    icon: UserPen,
                 },
-                {
-                    title: "Get Started",
-                    url: "#",
-                },
-                {
-                    title: "Tutorials",
-                    url: "#",
-                },
-                {
-                    title: "Changelog",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Settings",
-            url: "#",
-            icon: Settings2,
-            items: [
-                {
-                    title: "General",
-                    url: "#",
-                },
-                {
-                    title: "Team",
-                    url: "#",
-                },
-                {
-                    title: "Billing",
-                    url: "#",
-                },
-                {
-                    title: "Limits",
-                    url: "#",
-                },
-            ],
+            ]
         },
     ],
     navSecondary: [
         {
             title: "Support",
-            url: "#",
+            url: "/dashboard/support",
             icon: LifeBuoy,
         },
         {
             title: "Feedback",
-            url: "#",
+            url: "/dashboard/feedback",
             icon: Send,
-        },
-    ],
-    projects: [
-        {
-            name: "Design Engineering",
-            url: "#",
-            icon: Frame,
-        },
-        {
-            name: "Sales & Marketing",
-            url: "#",
-            icon: PieChart,
-        },
-        {
-            name: "Travel",
-            url: "#",
-            icon: Map,
         },
     ],
 }
@@ -162,22 +128,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <a href="#">
-                                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                                    <Command className="size-4" />
-                                </div>
-                                <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-medium">Acme Inc</span>
-                                    <span className="truncate text-xs">Enterprise</span>
-                                </div>
-                            </a>
+                            <Logo/>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.navMain} />
-                <NavProjects projects={data.projects} />
+                {/* <NavProjects projects={data.projects} /> */}
                 <NavSecondary items={data.navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>

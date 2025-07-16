@@ -1,9 +1,7 @@
 export default function Home() {
   return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="w-2/3">
-            <h1>Dashboard</h1>
-        </div>
+      <div className="bg-gray-200 rounded-lg p-4 shadow-md">
+
       </div>
   );
 }

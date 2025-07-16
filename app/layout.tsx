@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Anek_Latin} from "next/font/google";
-import { Header } from "@/components/Header";
+// import { Anek_Latin} from "next/font/google";
 import "./globals.css";
 
-const anekLatin = Anek_Latin({
-  variable: "--font-anek-latin",
-  subsets: ["latin"],
-});
+// const anekLatin = Anek_Latin({
+//   variable: "--font-anek-latin",
+//   subsets: ["latin"],
+// });
 
 
 export const metadata: Metadata = {
@@ -22,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${anekLatin.variable} antialiased`}
+        className="anek-latin antialiased"
       >
         {children}
       </body>

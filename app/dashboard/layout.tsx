@@ -5,10 +5,6 @@ import {
     SidebarProvider,
 } from "@/components/ui/sidebar"
 
-export const iframeHeight = "800px"
-
-export const description = "A sidebar with a header and a search form."
-
 export default function DashboardLayout({
     children,
 }: {
@@ -17,11 +13,15 @@ export default function DashboardLayout({
     return (
         <div className="[--header-height:calc(--spacing(14))]">
             <SidebarProvider className="flex flex-col">
-                <SiteHeader />
+                <SiteHeader/>
                 <div className="flex flex-1">
                     <AppSidebar />
                     <SidebarInset>
-                        {children}
+                        <div className="flex justify-center items-start w-full py-8">
+                            <div className="w-3/4">
+                                {children}
+                            </div>
+                        </div>
                     </SidebarInset>
                 </div>
             </SidebarProvider>
