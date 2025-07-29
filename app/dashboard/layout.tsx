@@ -24,6 +24,7 @@ export default function DashboardLayout({
                         </div>
                     </SidebarInset>
                 </div>
+                {/* <SidebarRight /> */}
             </SidebarProvider>
         </div>
     )

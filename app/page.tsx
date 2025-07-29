@@ -4,12 +4,15 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { Input } from "@/components/ui/input"
 import Footer from "@/components/Footer"
 import { Header } from "@/components/Header"
+import GradientDesign from "@/components/Gradient"
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-light-blue to-white">
       <Header/>
       {/* Hero Section */}
+      {/* <GradientDesign>
+      </GradientDesign> */}
       <section className="text-background py-20 md:py-32 hero-section">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto">

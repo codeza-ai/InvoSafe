@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-// import { Anek_Latin} from "next/font/google";
 import "./globals.css";
-
-// const anekLatin = Anek_Latin({
-//   variable: "--font-anek-latin",
-//   subsets: ["latin"],
-// });
 
 
 export const metadata: Metadata = {
