@@ -17,7 +17,7 @@ import Logo from "./Logo";
 export function Header() {
     return (
         <header className="flex items-center justify-center p-4 border-b border-2 border-gray-200 bg-white">
-            <div className="flex items-center justify-between w-2/3">
+            <div className="flex items-center justify-between w-3/4">
                 <Logo/>
                 {/* <Logo/> */}
                 <NavigationMenu viewport={false}>

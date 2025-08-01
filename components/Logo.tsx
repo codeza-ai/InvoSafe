@@ -13,8 +13,8 @@ export default function Logo({ className, light = false}: LogoProps) {
                 <Image
                     src={light ? "/Logo-light.svg" : "/Logo.svg"}
                     alt="InvoSafe"
-                    width={50}
-                    height={50}
+                    width={40}
+                    height={40}
                 />
                 <span className="ml-2 text-3xl font-bold">InvoSafe</span>
             </Link>

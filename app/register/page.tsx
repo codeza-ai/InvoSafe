@@ -1,6 +1,21 @@
+'use client';
+// import { useSession } from "next-auth/react";
+// import { useRouter } from "next/navigation";
+// import { useEffect } from "react";
 import { RegisterForm } from "@/components/forms/Register"
 import Logo from "@/components/Logo"
+
 export default function RegisterPage() {
+    // const { data: session, status } = useSession();
+    // const router = useRouter();
+
+    // useEffect(() => {
+    //     if (status === "authenticated") {
+    //         router.push("/dashboard"); // if already signed in, go to dashboard
+    //     }
+    // }, [status, router]);
+
+    // if (status === "loading") return <p>Loading...</p>;
     return (
         <div className="grid min-h-svh lg:grid-cols-2">
             <div className="flex flex-col gap-4 p-6 md:p-10">

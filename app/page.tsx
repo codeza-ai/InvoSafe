@@ -1,12 +1,16 @@
+'use client';
+
 import { ArrowRight, CheckCircle, Cloud, CreditCard, Send, Shield, Users, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import Footer from "@/components/Footer"
 import { Header } from "@/components/Header"
-import GradientDesign from "@/components/Gradient"
+import { useState } from "react";
+import { Subscribe } from "./actions";
 
 export default function LandingPage() {
+  const [email, setEmail] = useState("");
   return (
     <div className="min-h-screen bg-gradient-to-br from-light-blue to-white">
       <Header/>
@@ -189,8 +193,22 @@ export default function LandingPage() {
               Subsribe to our newsletter to stay updated on our progress and be the first to know when we launch!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-              <Input type="email" placeholder="Enter your business email" className="max-w-md bg-white border-1" />
-              <Button size="lg" variant={"default"}>
+              <Input 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              type="email" placeholder="Enter your business email" className="max-w-md bg-white border-1" />
+              <Button 
+              onClick={()=>{
+                Subscribe(email).then(() => {
+                  setEmail("");
+                  alert("Subscribed successfully!");
+                }).catch((error) => {
+                  console.error("Subscription error:", error);
+                  alert("Failed to subscribe. Please try again.");
+                });
+              }}
+              size="lg" variant={"default"}>
                 Subscribe
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>

@@ -1,18 +1,19 @@
-'use server';
+"use server";
 
-interface Subsriber{
-    email: string;
-}
-export default function subcribeEmail(data : Subsriber){
-    // Connect with database
+import { supabaseAdmin } from "@/db/connect";
+import { Subscriber } from "@/db/types/subscriber";
 
-    console.log("Subscribing email:", data.email);
-    // Here you would typically send the data to your backend API
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            // Simulate a successful subscription
-            resolve({ success: true, message: "Subscription successful!" });
-        }, 1000);
-    }
-);
+export async function Subscribe(email: string) {
+  const entry: Subscriber = {
+    // Ensure the email is valid
+    created_at : new Date().toISOString(),
+    subscriber_email: email,
+  };
+  const { data, error } = await supabaseAdmin
+    .from("subscribers")
+    .insert([entry]);
+
+  if (error) {
+    console.error("Error subscribing:", error);
+  }
 }
