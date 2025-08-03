@@ -6,7 +6,7 @@ import { getToken } from "next-auth/jwt";
 const protectedRoutes = ["/dashboard", "/profile"];
 const authPages = ["/login", "/register"];
 
-export async function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
@@ -26,9 +26,19 @@ export async function middleware(request: NextRequest) {
 
   return NextResponse.next();
 }
+// export default async function withAuth(
+//   middleware,
+//   {
+//     callbacks: {
+//       authorized: async ({ token, request }) => {
+//         // Allow access if the user is authenticated
+//         return !!token;
+//       },
+//     }
+//   }
+// )
 
-// middleware.ts (continued)
+//
 export const config = {
-  matcher: ['/dashboard/:path*', '/profile/:path*', '/login', '/signup'],
+  matcher: ["/dashboard/:path*", "/profile/:path*", "/login", "/register"],
 };
-

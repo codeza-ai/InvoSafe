@@ -37,7 +37,7 @@ import Logo from "../Logo"
 const data = {
     user: {
         name: "Darshan Odedara",
-        gstn: "22AAHFO1234F1Z5",
+        gstin: "22AAHFO1234F1Z5",
         avatar: "/avatars/shadcn.jpg",
     },
     navMain: [
@@ -119,6 +119,7 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    
     return (
         <Sidebar
             className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"

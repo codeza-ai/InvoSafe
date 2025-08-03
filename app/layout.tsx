@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import {Providers} from "@/components/Providers";
 import "./globals.css";
 
 
@@ -17,7 +18,9 @@ export default function RootLayout({
       <body
         className="anek-latin antialiased"
       >
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -1,12 +1,38 @@
+'use client'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { useState } from "react";
+import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
+
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"form">) {
+    const [gstin, setGstin] = useState("")
+    const [password, setPassword] = useState("")
+    const router = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
+        // Send plain text password to NextAuth - it will handle the hashing comparison
+        const result = await signIn("credentials", { 
+            gstin, 
+            password, // Send plain text password, not hashed
+            redirect: false // Prevent automatic redirect to handle errors
+        });
+
+        if (result?.error) {
+            console.log("Login error:", result.error);
+            alert("Invalid credentials. Please check your GST number and password.");
+        } else {
+            router.push("/dashboard");
+        }
+    }
     return (
         <form className={cn("flex flex-col gap-6", className)} {...props}>
             <div className="flex flex-col items-center gap-2 text-center">
@@ -18,7 +44,10 @@ export function LoginForm({
             <div className="grid gap-6">
                 <div className="grid gap-3">
                     <Label htmlFor="gst">GST Number</Label>
-                    <Input id="gst" type="text" placeholder="Eg. 22AAAAA0000A1Z5" required />
+                    <Input 
+                    value={gstin}
+                    onChange={(e) => setGstin(e.target.value)}
+                    id="gst" type="text" placeholder="Eg. 22AAAAA0000A1Z5" required />
                 </div>
                 <div className="grid gap-3">
                     <div className="flex items-center">
@@ -30,9 +59,14 @@ export function LoginForm({
                             Forgot your password?
                         </a>
                     </div>
-                    <Input id="password" type="password" required />
+                    <Input 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    id="password" type="password" required />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button 
+                onClick={handleSubmit}
+                type="submit" className="w-full">
                     Login
                 </Button>
             </div>

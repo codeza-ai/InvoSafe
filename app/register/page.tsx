@@ -1,19 +1,19 @@
 'use client';
-// import { useSession } from "next-auth/react";
-// import { useRouter } from "next/navigation";
-// import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { RegisterForm } from "@/components/forms/Register"
 import Logo from "@/components/Logo"
 
 export default function RegisterPage() {
-    // const { data: session, status } = useSession();
-    // const router = useRouter();
+    const { data: session, status } = useSession();
+    const router = useRouter();
 
-    // useEffect(() => {
-    //     if (status === "authenticated") {
-    //         router.push("/dashboard"); // if already signed in, go to dashboard
-    //     }
-    // }, [status, router]);
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.push("/dashboard"); // if already signed in, go to dashboard
+        }
+    }, [status, router]);
 
     // if (status === "loading") return <p>Loading...</p>;
     return (
