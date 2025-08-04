@@ -8,7 +8,7 @@ import Footer from "@/components/Footer"
 import { Header } from "@/components/Header"
 import { useState } from "react";
 import { Subscribe } from "./actions";
-
+import Link from "next/link";
 export default function LandingPage() {
   const [email, setEmail] = useState("");
   return (
@@ -29,7 +29,7 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Button size="lg" variant={"default"}>
-                Start Free Trial
+                <Link href="/register">Start Free Trial</Link>
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useMemo } from "react";
 import {
     LayoutDashboard,
     FileVolume,
@@ -115,22 +115,15 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const [user, setUser] = useState({
-        name: "",
-        gstin: "",
-        avatar: "",
-    });
     const { data: session } = useSession();
-    useEffect(() => {
-        if (session?.user) {
-            setUser({
-                name: session.user.business_name || "",
-                gstin: session.user.gstin || "",
-                avatar: session.user.profile_url || "",
-            })
-        }
-        console.log("Session data:", session);
-    }, []);
+    
+    const user = useMemo(() => ({
+        name: session?.user?.business_name || "",
+        gstin: session?.user?.gstin || "",
+        avatar: session?.user?.profile_url || "",
+    }), [session?.user]);
+
+    // console.log("Session data:", session);
     
     return (
         <Sidebar
