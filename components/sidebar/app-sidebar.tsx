@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState, useEffect } from "react"
 import {
     LayoutDashboard,
     FileVolume,
@@ -33,13 +33,9 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import Logo from "../Logo"
+import { useSession } from "next-auth/react"
 
 const data = {
-    user: {
-        name: "Darshan Odedara",
-        gstin: "22AAHFO1234F1Z5",
-        avatar: "/avatars/shadcn.jpg",
-    },
     navMain: [
         {
             title: "Dashboard",
@@ -119,6 +115,22 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const [user, setUser] = useState({
+        name: "",
+        gstin: "",
+        avatar: "",
+    });
+    const { data: session } = useSession();
+    useEffect(() => {
+        if (session?.user) {
+            setUser({
+                name: session.user.business_name || "",
+                gstin: session.user.gstin || "",
+                avatar: session.user.profile_url || "",
+            })
+        }
+        console.log("Session data:", session);
+    }, []);
     
     return (
         <Sidebar
@@ -140,7 +152,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavSecondary items={data.navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser user={user} />
             </SidebarFooter>
         </Sidebar>
     )

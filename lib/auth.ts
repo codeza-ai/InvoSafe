@@ -46,13 +46,14 @@ export const authOptions: NextAuthOptions = {
           }
           // If password is valid, return user data
 
-          return {  
+          const user =  {  
             id: userData.user_id, // Required by NextAuth
             gstin: userData.gstin,
             user_id: userData.user_id,
             business_name: userData.business_name,
             profile_url: userData.profile_url || null,
           };
+          return user as NextAuthUser;
           
         }catch (error) {
           console.error("Error during authorization:", error);
@@ -72,6 +73,8 @@ export const authOptions: NextAuthOptions = {
         token.user_id = user.user_id as string;
         token.business_name = user.business_name as string; 
         token.profile_url = user.profile_url as string;
+
+        // console.log("JWT token created:", token);
       }
       return token;
     },
@@ -85,6 +88,8 @@ export const authOptions: NextAuthOptions = {
         session.user.user_id = token.user_id as string;
         session.user.business_name = token.business_name as string;
         session.user.profile_url = token.profile_url as string | undefined;
+
+        // console.log("Session created:", session.user);
       }
       return session;
     },

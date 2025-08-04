@@ -15,6 +15,8 @@ import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname } from "next/navigation"
 import { ModeToggle } from "@/components/ModeToggle"
+import { signOut } from "next-auth/react"
+
 export function SiteHeader() {
     const { toggleSidebar } = useSidebar()
     // Get the current pathname from Next.js router
@@ -63,7 +65,11 @@ export function SiteHeader() {
                 </Breadcrumb>
             </div>
             <div className="flex h-(--header-height) w-fit items-center gap-2 px-4">
-                <Button variant={"default"}>
+                <Button 
+                onClick={()=>{
+                    signOut();
+                }}
+                variant={"default"}>
                     Log Out
                 </Button>
                 <Separator orientation="vertical" className="m-2 h-4" />
