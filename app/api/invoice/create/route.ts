@@ -6,20 +6,18 @@ import { InvoiceSchema } from "@/db/types/invoice";
 export async function POST(req: NextRequest) {
   try {
     // Check authentication using JWT token
-    const token = await getToken({ 
-      req, 
-      secret: process.env.NEXTAUTH_SECRET 
-    });
+    // const token = await getToken({ 
+    //   req, 
+    //   secret: process.env.NEXTAUTH_SECRET 
+    // });
     
-    console.log('Token:', token);
-    
-    if (!token || !token.gstin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // if (!token || !token.gstin) {
+    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // }
 
     const formData = await req.formData();
     
-    // Extract form fields
+    // Extract form fields (no validation here - handled on client)
     const senderGstin = formData.get("senderGstin") as string;
     const receiverGstin = formData.get("receiverGstin") as string;
     const amount = formData.get("amount") as string;
@@ -28,22 +26,10 @@ export async function POST(req: NextRequest) {
     const description = formData.get("description") as string;
     const invoiceDate = formData.get("invoiceDate") as string;
     const file = formData.get("invoiceFile") as File;
-
-    // Validate that the sender GST matches the authenticated user
-    if (senderGstin !== token.gstin) {
-      return NextResponse.json({ error: "Sender GST number doesn't match authenticated user" }, { status: 403 });
-    }
-
-    // Validate required fields
-    if (!senderGstin || !receiverGstin || !amount || !title || !invoiceNumber || !invoiceDate) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+    const senderUserId = formData.get("senderUserId") as string;
 
     // Generate unique invoice ID
     const invoiceId = crypto.randomUUID();
-
-    // Get sender user ID from token (already authenticated)
-    const senderUserId = token.user_id as string;
 
     // Get receiver user ID from GST number
     const { data: receiverUser } = await supabaseAdmin

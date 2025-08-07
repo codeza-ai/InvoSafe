@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import  {InputOTPForm} from "./OTPForm"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,23 +18,52 @@ import {
     TabsContent,
     TabsList,
     TabsTrigger,
-} from "@/components/ui/tabs"
+} from "@/components/ui/tabs";
+import { AlertCircleIcon } from "lucide-react";
+import { 
+    Alert, 
+    AlertTitle, 
+    AlertDescription 
+} from "@/components/ui/alert";
 
 export function RegisterForm() {
     const [gstin, setGstin] = useState("");
     // const [otp, setOtp] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
+
+    useEffect(()=>{
+        if(error){
+            const timer = setTimeout(()=>{
+                setError("");
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        }
+    })
 
     const handleSubmit = async(e: React.FormEvent) => {
         e.preventDefault();
         if(!gstin || !password || !confirmPassword) {
-            alert("Please fill all fields");
+            setError("Please fill all fields");
+            return;
+        }
+
+        // GSTIN validation
+        if (gstin.trim().length !== 15) {
+            setError("GST number must be exactly 15 characters long.");
+            return;
+        }
+        // GST format validation
+        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+        if (!gstRegex.test(gstin.trim())) {
+            setError("Invalid GST number format. Example: 22AAAAA0000A1Z5");
             return;
         }
 
         if(password !== confirmPassword) {
-            alert("Passwords do not match");
+            setError("Passwords do not match");
             return;
         }
         // Add your form submission logic here, e.g., API call to register user
@@ -65,6 +94,18 @@ export function RegisterForm() {
     }
     return (
         <div className="flex w-full max-w-sm flex-col gap-6">
+            <Alert
+                className={error ? "z-10 absolute top-5 left-1/2 transform -translate-x-1/2 w-full max-w-md" : "hidden"}
+                variant="destructive">
+                <AlertCircleIcon />
+                <AlertTitle>Credentials invalid.</AlertTitle>
+                <AlertDescription>
+                    <p>Please check credentials.</p>
+                    <ul className="list-inside list-disc text-sm">
+                        <li>{error}</li>
+                    </ul>
+                </AlertDescription>
+            </Alert>
             <Tabs defaultValue="register">
                 <TabsList>
                     <TabsTrigger value="register">Register</TabsTrigger>

@@ -17,6 +17,7 @@ export default function Page() {
     const [open, setOpen] = useState(false)
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errors, setErrors] = useState<string[]>([]);
 
     const [invoice, setInvoice] = useState<File | null>(null)
     const [receiverGstNumber, setReceiverGstNumber] = useState("")
@@ -30,33 +31,93 @@ export default function Page() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validation
-        if (!receiverGstNumber || !amount || !title || !invoiceNumber || !date) {
-            alert("Please fill in all required fields");
-            return;
-        }
-        if (!senderGstNumber) {
-            alert("Sender GST number not found. Please log in again.");
-            return;
-        }
-        if (receiverGstNumber === senderGstNumber) {
-            alert("Sender and receiver GST numbers cannot be the same");
+        const senderUserId = session?.user?.user_id || "";
+        const validationErrors: string[] = [];
+        if (!senderGstNumber || !senderUserId) {
+            alert("Unauthorized: Please log in to create an invoice.");
+            window.location.href = "/login";
             return;
         }
 
+        if (!receiverGstNumber.trim()) {
+            validationErrors.push("• Receiver GST Number is required");
+        }
+        if (!amount.trim()) {
+            validationErrors.push("• Amount is required");
+        }
+        if (!title.trim()) {
+            validationErrors.push("• Title is required");
+        }
+        if (!invoiceNumber.trim()) {
+            validationErrors.push("• Invoice Number is required");
+        }
+        if (!date) {
+            validationErrors.push("• Invoice Date is required");
+        }
+        // GST Number format validation
+        const gstRegex = /^[0-9]{1-2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+        if (receiverGstNumber.trim() && !gstRegex.test(receiverGstNumber.trim())) {
+            validationErrors.push("• Invalid GST Number format (should be 15 characters: 22AAAAA0000A1Z5)");
+        }
+
+        // Amount validation
+        const amountValue = parseFloat(amount);
+        if (amount.trim() && (isNaN(amountValue) || amountValue <= 0)) {
+            validationErrors.push("• Amount must be a positive number");
+        }
+        
+        if (amountValue > 10000000) { // 1 crore limit
+            validationErrors.push("• Amount cannot exceed ₹1,00,00,000");
+        }
+        if (receiverGstNumber.trim() === senderGstNumber) {
+            validationErrors.push("• Sender and receiver GST numbers cannot be the same");
+        }
+        if (title.trim() && title.trim().length > 100) {
+            validationErrors.push("• Title cannot exceed 100 characters");
+        }
+
+        if (description.trim() && description.trim().length > 500) {
+            validationErrors.push("• Description cannot exceed 500 characters");
+        }
+        if (date && date > new Date()) {
+            validationErrors.push("• Invoice date cannot be in the future");
+        }
+
+        if (invoice) {
+            const maxFileSize = 5 * 1024 * 1024; // 5MB
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            
+            if (invoice.size > maxFileSize) {
+                validationErrors.push("• File size cannot exceed 10MB");
+            }
+            
+            if (!allowedTypes.includes(invoice.type)) {
+                validationErrors.push("• Only PDF, JPEG, JPG, and PNG files are allowed");
+            }
+        }
+
+        // Show validation errors
+        if (validationErrors.length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+
+        // Clear any previous errors
+        setErrors([]);
         setIsSubmitting(true);
 
         try {
             // Prepare form data
             const formData = new FormData();
             formData.append("senderGstin", senderGstNumber);
-            formData.append("receiverGstin", receiverGstNumber);
-            formData.append("amount", amount);
-            formData.append("title", title);
-            formData.append("invoiceNumber", invoiceNumber);
-            formData.append("description", description);
-            formData.append("invoiceDate", date.toISOString());
-
+            formData.append("receiverGstin", receiverGstNumber.trim());
+            formData.append("amount", amount.trim());
+            formData.append("title", title.trim());
+            formData.append("invoiceNumber", invoiceNumber.trim());
+            formData.append("description", description.trim());
+            formData.append("invoiceDate", date!.toISOString()); // Safe because we validated date exists
+            formData.append("senderUserId", senderUserId);
+            
             if (invoice) {
                 formData.append("invoiceFile", invoice);
             }
@@ -104,10 +165,22 @@ export default function Page() {
                     </CardAction>
                 </CardHeader>
                 <CardContent>
+                    {/* Error Display */}
+                    {errors.length > 0 && (
+                        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <h4 className="text-red-800 font-semibold mb-2">Please fix the following errors:</h4>
+                            <ul className="text-red-700 text-sm space-y-1">
+                                {errors.map((error, index) => (
+                                    <li key={index}>{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
                     {/* Form will be hidden until GST number is verified */}
                     {/* <form className={verified ? "block" : "hidden"}> */}
                     <form onSubmit={handleSubmit}>
-                        <div className="flex mb-3">
+                        <div className="flex mb-3 items-baseline">
                             <div className="grid w-1/2 items-center gap-3 pr-3">
                                 <Label htmlFor="gstin">Sender GST Number</Label>
                                 <div className="flex items-center gap-2 w-full">
@@ -118,29 +191,27 @@ export default function Page() {
                                 </div>
                             </div>
                             <div className="grid w-1/2 items-center gap-3">
-                                <Label htmlFor="receiver-gstin">Receiver GST Number</Label>
+                                <Label htmlFor="receiver-gstin">Receiver GST Number * (15 chars)</Label>
                                 <div className="flex items-center gap-2 w-full">
                                     <Input
                                         id="receiver-gstin"
                                         type="text"
                                         required
-                                        placeholder="GST Number"
+                                        placeholder="22AAAAA0000A1Z5"
                                         value={receiverGstNumber}
-                                        onChange={(e) => setReceiverGstNumber(e.target.value)}
+                                        onChange={(e) => setReceiverGstNumber(e.target.value.toUpperCase())}
+                                        className={receiverGstNumber.length > 0 && receiverGstNumber.length !== 15 ? "border-red-500" : ""}
+                                        maxLength={15}
                                     />
-                                    {/* <Button type="submit" variant="default">
-                                        Verify
-                                    </Button> */}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                    {receiverGstNumber.length}/15 characters
                                 </div>
                             </div>
-
-                            {/* <div id="gst-status" className="text-sm text-gray-500">
-                            <span></span>
-                        </div> */}
                         </div>
                         <div className="flex mb-3">
                             <div className="grid w-1/3 items-center gap-3 mr-3">
-                                <Label htmlFor="invoice">Invoice File (Optional)</Label>
+                                <Label htmlFor="invoice">Invoice File</Label>
                                 <Input
                                     onChange={(e) => {
                                         if (e.target.files && e.target.files[0]) {
@@ -150,6 +221,7 @@ export default function Page() {
                                     id="invoice"
                                     type="file"
                                     accept=".pdf,.png,.jpg,.jpeg"
+                                    required
                                 />
                             </div>
                             <div className="grid w-1/3 items-center gap-3 mr-3">
@@ -196,7 +268,7 @@ export default function Page() {
                         </div>
                         <div className="flex mb-3">
                             <div className="grid w-1/2 items-center gap-3 pr-3">
-                                <Label htmlFor="title">Title</Label>
+                                <Label htmlFor="title">Title * (max 100 chars)</Label>
                                 <Input
                                     type="text"
                                     required
@@ -204,10 +276,14 @@ export default function Page() {
                                     placeholder="Title"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
+                                    className={title.length > 100 ? "border-red-500" : ""}
                                 />
+                                <div className="text-xs text-gray-500">
+                                    {title.length}/100 characters
+                                </div>
                             </div>
                             <div className="grid w-1/2 items-center gap-3">
-                                <Label htmlFor="invoice-number">Invoice Number</Label>
+                                <Label htmlFor="invoice-number">Invoice Number * (max 50 chars)</Label>
                                 <Input
                                     type="text"
                                     required
@@ -215,17 +291,25 @@ export default function Page() {
                                     placeholder="Invoice Number"
                                     value={invoiceNumber}
                                     onChange={(e) => setInvoiceNumber(e.target.value)}
+                                    className={invoiceNumber.length > 50 ? "border-red-500" : ""}
                                 />
+                                <div className="text-xs text-gray-500">
+                                    {invoiceNumber.length}/50 characters
+                                </div>
                             </div>
                         </div>
                         <div className="grid w-full gap-3 mb-3">
-                            <Label htmlFor="description">Your message</Label>
+                            <Label htmlFor="description">Description (Optional - max 500 chars)</Label>
                             <Textarea
                                 placeholder="Description of invoice"
                                 id="description"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
+                                className={description.length > 500 ? "border-red-500" : ""}
                             />
+                            <div className="text-xs text-gray-500">
+                                {description.length}/500 characters
+                            </div>
                         </div>
                     </form>
                 </CardContent>

@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
         .select("*")
         .eq("gstin", gstin);
 
-    if (businessError) {
+    if (!business || businessError) {
       console.error("Error fetching business:", businessError);
       return NextResponse.json(
-        { error: "Failed to fetch business. The GSTIN could be incorrect. Check the details." },
+        { error: "Failed to fetch business. The GSTIN could be incorrect or the service might be temporarily unavailable." },
         { status: 404 }
       );
     }
@@ -55,6 +55,9 @@ export async function POST(request: NextRequest) {
           mobile_number: business?.[0]?.mobile_number,
           profile_url : null,
           password: hashedPassword, // Store the server-side hashed password
+          business_email: null,
+          business_address: business?.[0]?.business_address,
+          business_description: business?.[0]?.business_description,
         }]);
 
     if (newUserError) {

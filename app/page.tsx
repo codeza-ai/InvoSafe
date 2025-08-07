@@ -6,11 +6,21 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { Input } from "@/components/ui/input"
 import Footer from "@/components/Footer"
 import { Header } from "@/components/Header"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Subscribe } from "./actions";
 import Link from "next/link";
 export default function LandingPage() {
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  // Auto-clear error after 3 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
   return (
     <div className="min-h-screen bg-gradient-to-br from-light-blue to-white">
       <Header/>
@@ -192,26 +202,31 @@ export default function LandingPage() {
             <p className="text-xl text-foreground mb-8">
               Subsribe to our newsletter to stay updated on our progress and be the first to know when we launch!
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-              <Input 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              type="email" placeholder="Enter your business email" className="max-w-md bg-white border-1" />
-              <Button 
-              onClick={()=>{
-                Subscribe(email).then(() => {
-                  setEmail("");
-                  alert("Subscribed successfully!");
-                }).catch((error) => {
-                  console.error("Subscription error:", error);
-                  alert("Failed to subscribe. Please try again.");
-                });
-              }}
-              size="lg" variant={"default"}>
-                Subscribe
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+            <div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+                <Input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  type="email" placeholder="Enter your business email" className="max-w-md bg-white border-1" />
+                <Button
+                  onClick={() => {
+                    Subscribe(email).then(() => {
+                      setEmail("");
+                      setError("Subscribed successfully!");
+                    }).catch((error) => {
+                      console.error("Subscription error:", error);
+                      setError("Failed to subscribe. Please try again.");
+                    });
+                  }}
+                  size="lg" variant={"default"}>
+                  Subscribe
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+              <div className="text-blue-500">
+                <p>{error}</p>
+              </div>
             </div>
             <p className="text-card-foreground text-sm">Do&apos;t worry, we won&apos;t spam your inbox • Cancel anytime</p>
           </div>
