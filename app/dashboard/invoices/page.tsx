@@ -8,11 +8,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useAlertActions } from "@/lib/use-alert"
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 
 export default function Page() {
     const { data: session } = useSession();
+    const { showError, showSuccess, showWarning } = useAlertActions();
 
     const [open, setOpen] = useState(false)
     const [date, setDate] = useState<Date | undefined>(undefined);
@@ -34,7 +36,7 @@ export default function Page() {
         const senderUserId = session?.user?.user_id || "";
         const validationErrors: string[] = [];
         if (!senderGstNumber || !senderUserId) {
-            alert("Unauthorized: Please log in to create an invoice.");
+            showWarning("Unauthorized: Please log in to create an invoice.");
             window.location.href = "/login";
             return;
         }
@@ -55,7 +57,7 @@ export default function Page() {
             validationErrors.push("• Invoice Date is required");
         }
         // GST Number format validation
-        const gstRegex = /^[0-9]{1-2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[0-9A-Z]{4}$/;
         if (receiverGstNumber.trim() && !gstRegex.test(receiverGstNumber.trim())) {
             validationErrors.push("• Invalid GST Number format (should be 15 characters: 22AAAAA0000A1Z5)");
         }
@@ -131,7 +133,7 @@ export default function Page() {
             const result = await response.json();
 
             if (response.ok) {
-                alert("Invoice created successfully!");
+                showSuccess("Invoice created successfully!");
                 // Reset form
                 setReceiverGstNumber("");
                 setAmount("");
@@ -140,14 +142,15 @@ export default function Page() {
                 setDescription("");
                 setDate(undefined);
                 setInvoice(null);
+                setErrors([]); // Clear any errors
                 // Optionally redirect to invoices list
                 // window.location.href = "/dashboard/invoices/sent";
             } else {
-                alert(`Error: ${result.error || "Failed to create invoice"}`);
+                showError(result.error || "Failed to create invoice");
             }
         } catch (error) {
             console.error("Error creating invoice:", error);
-            alert("An error occurred while creating the invoice");
+            showError("An error occurred while creating the invoice");
         } finally {
             setIsSubmitting(false);
         }

@@ -52,6 +52,10 @@ export const authOptions: NextAuthOptions = {
             user_id: userData.user_id,
             business_name: userData.business_name,
             profile_url: userData.profile_url || null,
+            mobile_number: userData.mobile_number || null,
+            email: userData.business_email || null,
+            business_address: userData.business_address || null,
+            business_description: userData.business_description || null,
           };
           return user as NextAuthUser;
           
@@ -88,8 +92,11 @@ export const authOptions: NextAuthOptions = {
         session.user.user_id = token.user_id as string;
         session.user.business_name = token.business_name as string;
         session.user.profile_url = token.profile_url as string | undefined;
-
-        // console.log("Session created:", session.user);
+        session.user.email = user?.email || undefined;
+        session.user.mobile_number = user?.mobile_number || undefined;
+        session.user.business_address = user?.business_address || undefined;
+        session.user.business_description = user?.business_description || undefined;
+        console.log("Session created:", session.user);
       }
       return session;
     },

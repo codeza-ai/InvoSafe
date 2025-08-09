@@ -2,8 +2,8 @@ import {z} from 'zod';
 
 export const InvoiceSchema = z.object({
     invoice_id : z.string().uuid(),
-    sender_gstin: z.string().min(14).max(15),
-    recipient_gstin: z.string().min(14).max(15),
+    sender_gstin: z.string().min(15).max(15),
+    recipient_gstin: z.string().min(15).max(15),
     amount: z.number().positive(),
     status: z.string().default("requested"),
     invoice_date: z.string().datetime(),

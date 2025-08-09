@@ -59,7 +59,9 @@ export async function POST(req: NextRequest) {
 
     // Validate data with Zod schema
     const validatedData = InvoiceSchema.parse(invoiceData);
-
+    if( !validatedData) {
+      return NextResponse.json({ error: "Invalid invoice data" }, { status: 400 });
+    }
     // Upload file to Supabase Storage if provided
     let filePath = null;
     if (file && file.size > 0) {
@@ -79,9 +81,7 @@ export async function POST(req: NextRequest) {
     // Create invoice entry in database
     const { data: newInvoice, error: dbError } = await supabaseAdmin
       .from("invoices")
-      .insert([validatedData])
-      .select()
-      .single();
+      .insert([validatedData]);
 
     if (dbError) {
       console.error("Database error:", dbError);
@@ -89,8 +89,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ 
-      success: true, 
-      invoice: newInvoice 
+      success: true,
     }, { status: 201 });
 
   } catch (error) {

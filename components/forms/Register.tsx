@@ -25,45 +25,38 @@ import {
     AlertTitle, 
     AlertDescription 
 } from "@/components/ui/alert";
+import { useAlertActions } from "@/lib/use-alert";
+import { useRouter } from "next/navigation";
 
 export function RegisterForm() {
+    const router = useRouter();
     const [gstin, setGstin] = useState("");
-    // const [otp, setOtp] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
+    const { showError, showSuccess, showWarning } = useAlertActions();
 
-    useEffect(()=>{
-        if(error){
-            const timer = setTimeout(()=>{
-                setError("");
-            }, 3000);
-
-            return () => clearTimeout(timer);
-        }
-    })
 
     const handleSubmit = async(e: React.FormEvent) => {
         e.preventDefault();
         if(!gstin || !password || !confirmPassword) {
-            setError("Please fill all fields");
+            showWarning("Please fill all fields");
             return;
         }
 
         // GSTIN validation
         if (gstin.trim().length !== 15) {
-            setError("GST number must be exactly 15 characters long.");
+            showError("GST number must be exactly 15 characters long.");
             return;
         }
         // GST format validation
         const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
         if (!gstRegex.test(gstin.trim())) {
-            setError("Invalid GST number format. Example: 22AAAAA0000A1Z5");
+            showError("Invalid GST number format. Example: 22AAAAA0000A1Z5");
             return;
         }
 
         if(password !== confirmPassword) {
-            setError("Passwords do not match");
+            showError("Passwords do not match");
             return;
         }
         // Add your form submission logic here, e.g., API call to register user
@@ -80,32 +73,17 @@ export function RegisterForm() {
         });
         if (!response.ok) {
             const errorData = await response.json();
-            alert(`Error: ${errorData.message}`);
+            showError(`Error: ${errorData.message}`);
             return;
         }else{
-            alert("Registration successful! Please login.");
-            // Redirect to login page or perform any other action
-            window.location.href = "/login";
-            // Reset form fields
-            setGstin("");
-            setPassword("");
-            setConfirmPassword("");
+            showSuccess("Registration successful! Please login.");
+            setTimeout(()=>{
+                router.push("/login");
+            }, 3000);
         }
     }
     return (
         <div className="flex w-full max-w-sm flex-col gap-6">
-            <Alert
-                className={error ? "z-10 absolute top-5 left-1/2 transform -translate-x-1/2 w-full max-w-md" : "hidden"}
-                variant="destructive">
-                <AlertCircleIcon />
-                <AlertTitle>Credentials invalid.</AlertTitle>
-                <AlertDescription>
-                    <p>Please check credentials.</p>
-                    <ul className="list-inside list-disc text-sm">
-                        <li>{error}</li>
-                    </ul>
-                </AlertDescription>
-            </Alert>
             <Tabs defaultValue="register">
                 <TabsList>
                     <TabsTrigger value="register">Register</TabsTrigger>
