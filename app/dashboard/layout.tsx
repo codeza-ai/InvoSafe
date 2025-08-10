@@ -54,7 +54,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     };
     // Get alert styling based on variant
     const getAlertStyling = () => {
-        const baseClasses = "z-50 fixed top-5 left-1/2 transform -translate-x-1/2 w-full max-w-md shadow-lg border-2";
+        const baseClasses = "z-100 fixed top-5 left-1/2 transform -translate-x-1/2 w-full max-w-md shadow-lg border-2";
         
         switch (alert.variant) {
             case 'success':

@@ -7,8 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useMemo } from "react";
 import { useSession } from "next-auth/react";
-import { Mail, Phone, MapPin, Building, CreditCard, Star, UserPen } from "lucide-react";
-import Link from "next/link";
+import { Mail, Phone, MapPin, Building, CreditCard, UserPen } from "lucide-react";
 
 export default function ProfileCard() {
     const { data: session } = useSession();
@@ -19,8 +18,8 @@ export default function ProfileCard() {
         avatar: session?.user?.profile_url || "",
         user_id: session?.user?.user_id || "",
         address: session?.user?.business_address || "",
-        desc: session?.user?.business_description || "Description of Business",
-        email: session?.user?.email || "",
+        desc: session?.user?.business_description || "No description available",
+        email: session?.user?.business_email || "No email",
         mobile: session?.user?.mobile_number || "",
     }), [session?.user]);
 
@@ -42,7 +41,7 @@ export default function ProfileCard() {
                     <div className="relative">
                         <Avatar className="w-32 h-32 border-1 ring-1 ring-gray-200">
                             <AvatarImage 
-                                src={user.avatar || "/avatar.jpg"} 
+                                src={user.avatar} 
                                 alt="Profile Picture" 
                                 className="object-cover"
                             />
@@ -50,9 +49,6 @@ export default function ProfileCard() {
                                 {getInitials(user.name)}
                             </AvatarFallback>
                         </Avatar>
-                        <div className="absolute -bottom-2 -right-2 bg-green-500 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center">
-                            <Star className="w-4 h-4 text-white fill-current" />
-                        </div>
                     </div>
 
                     {/* Business Info */}
@@ -71,11 +67,6 @@ export default function ProfileCard() {
                                         Verified Business
                                     </Badge>
                                 </div>
-                                <Link
-                                    href="/dashboard/profile/update"
-                                >
-                                    <UserPen/>
-                                </Link>
                             </div>
                         </div>
                         

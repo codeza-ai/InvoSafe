@@ -41,8 +41,6 @@ export const authOptions: NextAuthOptions = {
           if (!isPasswordValid) {
             console.error("Invalid password");
             return null;
-          }else{
-            console.log("Password is valid");
           }
           // If password is valid, return user data
 
@@ -53,7 +51,7 @@ export const authOptions: NextAuthOptions = {
             business_name: userData.business_name,
             profile_url: userData.profile_url || null,
             mobile_number: userData.mobile_number || null,
-            email: userData.business_email || null,
+            business_email: userData.business_email || null,
             business_address: userData.business_address || null,
             business_description: userData.business_description || null,
           };
@@ -77,26 +75,27 @@ export const authOptions: NextAuthOptions = {
         token.user_id = user.user_id as string;
         token.business_name = user.business_name as string; 
         token.profile_url = user.profile_url as string;
-
-        // console.log("JWT token created:", token);
+        token.mobile_number = user.mobile_number as string;
+        token.business_email = user.business_email as string;
+        token.business_address = user.business_address as string;
+        token.business_description = user.business_description as string;
       }
       return token;
     },
     // Callback to handle session
     // This function is called whenever a session is accessed
     // It can be used to modify the session object
-    async session({ session, user, token }) {
+    async session({ session, token }) {
       // If token data is available, add it to the session
       if (token) {
         session.user.gstin = token.gstin as string;
         session.user.user_id = token.user_id as string;
         session.user.business_name = token.business_name as string;
         session.user.profile_url = token.profile_url as string | undefined;
-        session.user.email = user?.email || undefined;
-        session.user.mobile_number = user?.mobile_number || undefined;
-        session.user.business_address = user?.business_address || undefined;
-        session.user.business_description = user?.business_description || undefined;
-        console.log("Session created:", session.user);
+        session.user.mobile_number = token.mobile_number as string | undefined;
+        session.user.business_email = token.business_email as string | undefined;
+        session.user.business_address = token.business_address as string | undefined;
+        session.user.business_description = token.business_description as string | undefined;
       }
       return session;
     },

@@ -105,6 +105,7 @@ export function NavUser({
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
+                            className="cursor-pointer bg-gray-900 text-white"
                             onClick={()=>{
                                 signOut({ callbackUrl: "/" })
                             }}

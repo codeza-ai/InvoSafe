@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+// import { getToken } from "next-auth/jwt";
 import { supabaseAdmin } from "@/db/connect";
 
 export async function POST(req: NextRequest) {
@@ -29,7 +29,12 @@ export async function POST(req: NextRequest) {
             .select("*")
             .eq("gstin", gstin)
             .single();
-
+        if(!user){
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 404 }
+            );
+        }
         if (error) {
             console.error("Error fetching user:", error);
             return NextResponse.json(
@@ -44,6 +49,7 @@ export async function POST(req: NextRequest) {
             business_name: user.business_name,
             business_email: user.business_email,
             business_address: user.business_address,
+            business_description: user.business_description,
             mobile_number: user.mobile_number,
             profile_url: user.profile_url
         };

@@ -21,7 +21,6 @@ declare module "next-auth" {
     business_name: string;
     profile_url?: string | null;
     mobile_number?: string;
-    email?: string;
     business_address?: string;
     business_description?: string;
     business_email?: string;
@@ -34,5 +33,9 @@ declare module "next-auth/jwt" {
     user_id: string;
     business_name: string;
     profile_url?: string;
+    mobile_number?: string;
+    business_email?: string;
+    business_address?: string;
+    business_description?: string;
   }
 }

@@ -200,7 +200,7 @@ export default function Page() {
                                         id="receiver-gstin"
                                         type="text"
                                         required
-                                        placeholder="22AAAAA0000A1Z5"
+                                        placeholder="Eg. 22AAAAA0000A1Z5"
                                         value={receiverGstNumber}
                                         onChange={(e) => setReceiverGstNumber(e.target.value.toUpperCase())}
                                         className={receiverGstNumber.length > 0 && receiverGstNumber.length !== 15 ? "border-red-500" : ""}

@@ -48,7 +48,9 @@ export function SidebarRight({
         >
             <SidebarHeader className="border-sidebar-border h-16 border-b">
             </SidebarHeader>
-            <SidebarContent>
+            <SidebarContent
+                className="gap-0"
+            >
                 <Calendar
                     mode="single"
                     captionLayout="dropdown"
@@ -56,6 +58,7 @@ export function SidebarRight({
                 <SidebarSeparator className="mx-0" />
             </SidebarContent>
             <SidebarFooter>
+                {/* Page specific tips */}
             </SidebarFooter>
         </Sidebar>
     )
