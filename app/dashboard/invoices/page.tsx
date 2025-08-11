@@ -33,9 +33,9 @@ export default function Page() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const senderUserId = session?.user?.user_id || "";
+        const senderUserName = session?.user?.business_name || "";
         const validationErrors: string[] = [];
-        if (!senderGstNumber || !senderUserId) {
+        if (!senderGstNumber || !senderUserName) {
             showWarning("Unauthorized: Please log in to create an invoice.");
             window.location.href = "/login";
             return;
@@ -118,7 +118,7 @@ export default function Page() {
             formData.append("invoiceNumber", invoiceNumber.trim());
             formData.append("description", description.trim());
             formData.append("invoiceDate", date!.toISOString()); // Safe because we validated date exists
-            formData.append("senderUserId", senderUserId);
+            formData.append("senderUserName", senderUserName);
             
             if (invoice) {
                 formData.append("invoiceFile", invoice);

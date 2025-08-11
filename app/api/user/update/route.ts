@@ -1,11 +1,19 @@
 //https://fxlianxlwekzkiqarlev.supabase.co/storage/v1/object/public/profile-pictures/
 
 import { NextRequest, NextResponse } from "next/server";
-// import { getToken } from "next-auth/jwt";
+import { getToken } from "next-auth/jwt";
 import { supabaseAdmin } from "@/db/connect";
 
 export async function POST(req: NextRequest) {
     try{
+        const token = await getToken({
+          req,
+          secret: process.env.NEXT_AUTH_SECRET,
+        });
+
+        if (!token || !token.gstin) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         const formData = await req.formData();
 
         const picture = formData.get("profilePicture") as File | null;

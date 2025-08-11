@@ -7,9 +7,9 @@ export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Get the token from the request
-  const token = await getToken({ 
-    req: request, 
-    secret: process.env.NEXTAUTH_SECRET 
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXT_AUTH_SECRET,
   });
 
   // Protect API routes (except auth routes)

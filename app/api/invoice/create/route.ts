@@ -6,14 +6,14 @@ import { InvoiceSchema } from "@/db/types/invoice";
 export async function POST(req: NextRequest) {
   try {
     // Check authentication using JWT token
-    // const token = await getToken({ 
-    //   req, 
-    //   secret: process.env.NEXTAUTH_SECRET 
-    // });
+    const token = await getToken({
+      req,
+      secret: process.env.NEXT_AUTH_SECRET,
+    });
     
-    // if (!token || !token.gstin) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
+    if (!token || !token.gstin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const formData = await req.formData();
     
@@ -26,15 +26,15 @@ export async function POST(req: NextRequest) {
     const description = formData.get("description") as string;
     const invoiceDate = formData.get("invoiceDate") as string;
     const file = formData.get("invoiceFile") as File;
-    const senderUserId = formData.get("senderUserId") as string;
+    const senderUserName = formData.get("senderUserName") as string;
 
     // Generate unique invoice ID
     const invoiceId = crypto.randomUUID();
 
-    // Get receiver user ID from GST number
+    // Get receiver user ID and business name from GST number
     const { data: receiverUser } = await supabaseAdmin
       .from("users")
-      .select("user_id")
+      .select("business_name")
       .eq("gstin", receiverGstin)
       .single();
 
@@ -50,8 +50,8 @@ export async function POST(req: NextRequest) {
       amount: parseFloat(amount),
       status: "requested",
       invoice_date: invoiceDate,
-      sender_id: senderUserId,
-      recipient_id: receiverUser.user_id,
+      sender_name: senderUserName,
+      recipient_name: receiverUser.business_name,
       title: title,
       description: description || null,
       invoice_number: invoiceNumber,
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create invoice entry in database
-    const { data: newInvoice, error: dbError } = await supabaseAdmin
+    const { data , error: dbError } = await supabaseAdmin
       .from("invoices")
       .insert([validatedData]);
 
@@ -88,7 +88,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to create invoice" }, { status: 500 });
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
+      message: "Invoice created successfully", 
       success: true,
     }, { status: 201 });
 
