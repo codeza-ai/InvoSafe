@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     // Check authentication using JWT token
     const token = await getToken({
       req,
-      secret: process.env.NEXT_AUTH_SECRET,
+      secret: process.env.NEXTAUTH_SECRET,
     });
     
     if (!token || !token.gstin) {

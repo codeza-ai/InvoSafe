@@ -7,35 +7,12 @@ import {
     SidebarContent,
     SidebarFooter,
     SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarRail,
     SidebarSeparator,
 } from "@/components/ui/sidebar"
 
+// import Link from "next/link";
+// import { BellRing } from "lucide-react";
 // This is sample data.
-const data = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-    calendars: [
-        {
-            name: "My Calendars",
-            items: ["Personal", "Work", "Family"],
-        },
-        {
-            name: "Favorites",
-            items: ["Holidays", "Birthdays"],
-        },
-        {
-            name: "Other",
-            items: ["Travel", "Reminders", "Deadlines"],
-        },
-    ],
-}
 
 export function SidebarRight({
     ...props
@@ -47,6 +24,14 @@ export function SidebarRight({
             {...props}
         >
             <SidebarHeader className="border-sidebar-border h-16 border-b">
+                <div className="text-sm flex items-center justify-between h-full px-4">
+                    {/* <Link
+                        href="/dashboard/notifications"
+                        className="flex items-center gap-2 px-4 font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+                        <BellRing />
+                        Notifications
+                    </Link> */}
+                </div>
             </SidebarHeader>
             <SidebarContent
                 className="gap-0"

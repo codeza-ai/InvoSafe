@@ -1,8 +1,17 @@
+import { Button } from "@/components/ui/button";
+import InvoiceRequestExample from "@/components/invoices/RequestExample";
 export default function Home() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
-            <div className="w-2/3">
-                <h1>Bill Requests</h1>
+        <div className="">
+            <div className="">
+                <div className="flex">
+                    <form action="">
+                        <input type="text" className="flex border-none text-lg"/>
+                        <Button/>
+                    </form>
+                </div>
+                <div>
+                </div>
             </div>
         </div>
     );

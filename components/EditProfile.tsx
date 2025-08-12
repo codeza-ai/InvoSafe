@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useMemo, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Mail, Phone, MapPin, Building, CreditCard, UserPen } from "lucide-react";
+import { Mail, Phone, MapPin, Building, CreditCard, Camera } from "lucide-react";
 import { useAlertActions } from "@/lib/use-alert";
 import { useRouter } from "next/navigation";
 import { Textarea } from "./ui/textarea";
@@ -122,8 +122,8 @@ export default function EditProfile() {
                                 {getInitials(user.name)}
                             </AvatarFallback>
                         </Avatar>
-                        <div className="absolute -bottom-2 -right-2 bg-black w-10 h-10 rounded-full border-4 border-white flex items-center justify-center cursor-pointer hover:bg-gray-800 transition-colors">
-                            <UserPen className="w-4 h-4 text-white" />
+                        <div className="absolute -bottom-2 -right-2 bg-white w-10 h-10 rounded-full border-1 border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
+                            <Camera className="w-4 h-4 text-black" />
                             <Input
                                 type="file"
                                 accept="image/*"
@@ -209,7 +209,7 @@ export default function EditProfile() {
                                     <div className="bg-green-100 p-2 rounded-full">
                                         <Phone className="w-4 h-4 text-green-600" />
                                     </div>
-                                    <div>
+                                    <div className="cursor-not-allowed">
                                         <div className="font-medium text-gray-900">{user.mobile}</div>
                                     </div>
                                 </div>
@@ -225,7 +225,7 @@ export default function EditProfile() {
                                 Address
                             </Label>
                         </div>
-                        <div className="bg-white p-4 rounded-lg border shadow-sm">
+                        <div className="bg-white p-4 rounded-lg border shadow-sm cursor-not-allowed">
                             <p className="text-gray-700 leading-relaxed">
                                 {user.address}
                             </p>
@@ -235,6 +235,7 @@ export default function EditProfile() {
                 <CardFooter>
                     <div className="flex justify-end gap-4 mt-4 w-full">
                         <Button
+                            className="cursor-pointer"
                             type="button"
                             variant="secondary"
                             onClick={() => {
@@ -248,6 +249,7 @@ export default function EditProfile() {
                             Reset
                         </Button>
                         <Button
+                            className="cursor-pointer"
                             type="submit"
                             variant="default"
                             disabled={isLoading}

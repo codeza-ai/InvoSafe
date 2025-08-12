@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     try{
         const token = await getToken({
           req,
-          secret: process.env.NEXT_AUTH_SECRET,
+          secret: process.env.NEXTAUTH_SECRET,
         });
 
         if (!token || !token.gstin) {

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { useAlertActions } from "@/lib/use-alert"
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
+import { FileForm } from "@/components/forms/FileForm"
 
 export default function Page() {
     const { data: session } = useSession();
@@ -180,8 +181,6 @@ export default function Page() {
                         </div>
                     )}
 
-                    {/* Form will be hidden until GST number is verified */}
-                    {/* <form className={verified ? "block" : "hidden"}> */}
                     <form onSubmit={handleSubmit}>
                         <div className="flex mb-3 items-baseline">
                             <div className="grid w-1/2 items-center gap-3 pr-3">
@@ -215,45 +214,20 @@ export default function Page() {
                         <div className="flex mb-3">
                             <div className="grid w-1/3 items-center gap-3 mr-3">
                                 <Label htmlFor="invoice">Invoice File</Label>
-                                <Input
-                                    onChange={(e) => {
-                                        if (e.target.files && e.target.files[0]) {
-                                            setInvoice(e.target.files[0])
-                                        }
-                                    }}
-                                    id="invoice"
-                                    type="file"
-                                    accept=".pdf,.png,.jpg,.jpeg"
-                                    required
-                                />
+                                <FileForm 
+                                name = {invoice ? invoice.name : "Select file"}
+                                setInvoice={setInvoice} />
                             </div>
                             <div className="grid w-1/3 items-center gap-3 mr-3">
                                 <Label htmlFor="date" className="px-1">
                                     Date of Invoice
                                 </Label>
-                                <Popover open={open} onOpenChange={setOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            id="date"
-                                            className="w-48 justify-between font-normal"
-                                        >
-                                            {date ? date.toLocaleDateString() : "Select date"}
-                                            <ChevronDownIcon />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={date}
-                                            captionLayout="dropdown"
-                                            onSelect={(date) => {
-                                                setDate(date)
-                                                setOpen(false)
-                                            }}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+                                <DateSelect
+                                    date={date}
+                                    setDate={setDate}
+                                    setOpen={setOpen}
+                                    open={open}
+                                />
                             </div>
                             <div className="grid w-1/3 items-center gap-3">
                                 <Label htmlFor="amount">Amount (INR) *</Label>
@@ -329,4 +303,39 @@ export default function Page() {
             </Card>
         </div>
     );
+}
+
+function DateSelect(
+    { date, setDate, setOpen, open }: 
+    { 
+        date: Date | undefined,
+        setDate: (date: Date | undefined) => void,
+        setOpen: (open: boolean) => void,
+        open: boolean
+    }) {
+    return(
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    id="date"
+                    className="w-48 justify-between font-normal"
+                >
+                    {date ? date.toLocaleDateString() : "Select date"}
+                    <ChevronDownIcon />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    captionLayout="dropdown"
+                    onSelect={(date) => {
+                        setDate(date)
+                        setOpen(false)
+                    }}
+                />
+            </PopoverContent>
+        </Popover>
+    )
 }

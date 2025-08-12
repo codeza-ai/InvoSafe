@@ -30,7 +30,7 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 import { signOut } from "next-auth/react";
-
+import Link from "next/link";
 export function NavUser({
     user,
 }: {
@@ -69,7 +69,7 @@ export function NavUser({
                         sideOffset={4}
                     >
                         <DropdownMenuLabel className="p-0 font-normal">
-                            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                            <Link href="/dashboard/profile" className="flex items-center gap-2 px-1 py-1.5 text-left text-sm cursor-pointer">
                                 <Avatar className="h-8 w-8 rounded-lg">
                                     <AvatarImage src={user.avatar} alt={user.name} />
                                     {/* <AvatarImage src="/avatar.jpg" alt={user.name} /> */}
@@ -79,7 +79,7 @@ export function NavUser({
                                     <span className="truncate font-medium">{user.name}</span>
                                     <span className="truncate text-xs">{user.gstin}</span>
                                 </div>
-                            </div>
+                            </Link>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
