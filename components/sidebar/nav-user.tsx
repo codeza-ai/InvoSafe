@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/sidebar"
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { SecureKeyManager } from "@/lib/key-storage";
 export function NavUser({
     user,
 }: {
@@ -41,6 +42,28 @@ export function NavUser({
     }
 }) {
     const { isMobile } = useSidebar()
+
+    // Handle logout with key cleanup
+    const handleLogout = async () => {
+        try {
+            // Clear the keyEncryptionKey before signing out
+            SecureKeyManager.clearKey();
+            console.log("Encryption key cleared successfully");
+            
+            // Sign out from NextAuth
+            await signOut({ 
+                callbackUrl: "/",
+                redirect: true 
+            });
+        } catch (error) {
+            console.error("Error during logout:", error);
+            // Still attempt to sign out even if key clearing fails
+            await signOut({ 
+                callbackUrl: "/",
+                redirect: true 
+            });
+        }
+    };
 
     return (
         <SidebarMenu>
@@ -106,9 +129,7 @@ export function NavUser({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             className="cursor-pointer bg-gray-900 text-white"
-                            onClick={()=>{
-                                signOut({ callbackUrl: "/" })
-                            }}
+                            onClick={handleLogout}
                         >
                             <LogOut />
                             Log out

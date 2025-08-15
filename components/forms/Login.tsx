@@ -10,6 +10,7 @@ import { signIn } from "next-auth/react"
 import { AlertCircleIcon } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useAlertActions } from "@/lib/use-alert";
+import { SecureKeyManager } from "@/lib/key-storage";
 
 export function LoginForm({
     className,
@@ -39,21 +40,37 @@ export function LoginForm({
             showError("Invalid GST number format. Example: 22AAAAA0000A1Z5");
             return;
         }
-        // Send plain text password to NextAuth - it will handle the hashing comparison
-        const result = await signIn("credentials", {
-            gstin,
-            password, // Send plain text password, not hashed
-            redirect: false // Prevent automatic redirect to handle errors
-        });
+        
+        try {
+            // Send plain text password to NextAuth - it will handle the hashing comparison
+            const result = await signIn("credentials", {
+                gstin,
+                password, // Send plain text password, not hashed
+                redirect: false // Prevent automatic redirect to handle errors
+            });
 
-        if (result?.error) {
-            console.log("Login error:", result.error);
-            showError("Invalid credentials. Please check your GST number and password.");
-        } else {
-            showSuccess("Login successful! Redirecting...");
-            setTimeout(()=>{
-                router.push("/dashboard");
-            }, 3000);
+            if (result?.error) {
+                console.log("Login error:", result.error);
+                showError("Invalid credentials. Please check your GST number and password.");
+            } else {
+                // Generate and store the keyEncryptionKey after successful login
+                try {
+                    await SecureKeyManager.generateAndStoreKey(password);
+                    showSuccess("Login successful! Redirecting...");
+                    setTimeout(() => {
+                        router.push("/dashboard");
+                    }, 1500);
+                } catch (keyError) {
+                    console.error("Error generating encryption key:", keyError);
+                    showError("Login successful but failed to initialize security features.");
+                    setTimeout(() => {
+                        router.push("/dashboard");
+                    }, 2000);
+                }
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            showError("An unexpected error occurred. Please try again.");
         }
     }
     return (

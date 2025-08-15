@@ -13,8 +13,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash the password on the server side
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (!user_id) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+    // Generate salt and hash the password
+    const salt = await bcrypt.genSalt(10);
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Check if the user already exists
     const { data: existingUser, error: userError } = await supabaseAdmin
