@@ -1,6 +1,17 @@
 import sodium from "libsodium-wrappers-sumo";
-import { bytes, fromB64, toB64, generateKey, generateDeriveKeySalt } from "@/lib/utils";
-import { DerivedKey, EncryptedBoxB64, KeyAttributes, GenerateKeysAndAttributesResult } from "@/types/keys";
+import {
+  bytes,
+  fromB64,
+  toB64,
+  generateKey,
+  generateDeriveKeySalt,
+} from "@/lib/utils";
+import {
+  DerivedKey,
+  EncryptedBoxB64,
+  KeyAttributes,
+  GenerateKeysAndAttributesResult,
+} from "@/types/keys";
 
 export const deriveKey = async (
   passphrase: string,
@@ -20,7 +31,6 @@ export const deriveKey = async (
     )
   );
 };
-
 
 export const deriveSensitiveKey = async (
   passphrase: string
@@ -120,7 +130,7 @@ export async function generateKeysAndAttributes(
     // masterKeyEncryptedWithRecoveryKey,
     // masterKeyDecryptionNonce,
     // recoveryKeyEncryptedWithMasterKey,
-    // recoveryKeyDecryptionNonce,  
+    // recoveryKeyDecryptionNonce,
   };
 
   return { masterKey, kek, keyAttributes };

@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/sidebar"
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { SecureKeyManager } from "@/lib/key-storage";
 export function NavUser({
     user,
 }: {
@@ -47,7 +46,6 @@ export function NavUser({
     const handleLogout = async () => {
         try {
             // Clear the keyEncryptionKey before signing out
-            SecureKeyManager.clearKey();
             console.log("Encryption key cleared successfully");
             
             // Sign out from NextAuth

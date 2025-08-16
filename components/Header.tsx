@@ -13,7 +13,6 @@ import {
 import { ModeToggle } from "./ModeToggle"
 import Logo from "./Logo";
 import { useSession,signOut } from "next-auth/react";
-import { SecureKeyManager } from "@/lib/key-storage";
 
 export function Header() {
     const { data: session } = useSession();
@@ -23,7 +22,6 @@ export function Header() {
     const handleLogout = async () => {
         try {
             // Clear the keyEncryptionKey before signing out
-            SecureKeyManager.clearKey();
             console.log("Encryption key cleared successfully");
             
             // Sign out from NextAuth

@@ -19,16 +19,13 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
-import { AlertCircleIcon } from "lucide-react";
-import { 
-    Alert, 
-    AlertTitle, 
-    AlertDescription 
-} from "@/components/ui/alert";
 import { useAlertActions } from "@/lib/use-alert";
 import { useRouter } from "next/navigation";
+import { generateKeysAndAttributes } from "@/lib/keys";
+import { set } from "zod";
 
 export function RegisterForm() {
+    const [processing, setProcessing] = useState(false);
     const router = useRouter();
     const [gstin, setGstin] = useState("");
     const [password, setPassword] = useState("");
@@ -40,23 +37,42 @@ export function RegisterForm() {
         e.preventDefault();
         if(!gstin || !password || !confirmPassword) {
             showWarning("Please fill all fields");
+            setProcessing(false);
             return;
         }
 
         // GSTIN validation
         if (gstin.trim().length !== 15) {
             showError("GST number must be exactly 15 characters long.");
+            setProcessing(false);
             return;
         }
         // GST format validation
         const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
         if (!gstRegex.test(gstin.trim())) {
             showError("Invalid GST number format. Example: 22AAAAA0000A1Z5");
+            setProcessing(false);
+            return;
+        }
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            showError("Please select a password that satisfies the requirements.");
+            setProcessing(false);
+            return;
+        }
+        if(password !== confirmPassword) {
+            showError("Passwords do not match");
+            setProcessing(false);
             return;
         }
 
-        if(password !== confirmPassword) {
-            showError("Passwords do not match");
+        // Generate keys and attributes
+        let keysAndAttributes = null;
+        try {
+            keysAndAttributes = await generateKeysAndAttributes(password);
+        } catch (error) {
+            showError("Register service unavailable, please try again later.");
+            setProcessing(false);
             return;
         }
         // Add your form submission logic here, e.g., API call to register user
@@ -69,11 +85,13 @@ export function RegisterForm() {
                 gstin,
                 user_id : crypto.randomUUID(), // Generate a unique user ID
                 password, // Send plain text password - server will hash it
+                keyAttributes : keysAndAttributes.keyAttributes,
             }),
         });
         if (!response.ok) {
             const errorData = await response.json();
             showError(`Error: ${errorData.message}`);
+            setProcessing(false);
             return;
         }else{
             showSuccess("Registration successful! Please login.");
@@ -138,6 +156,9 @@ export function RegisterForm() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Set password</CardTitle>
+                            <CardDescription>
+                                The password must be at least 8 characters long. It must contain at least one uppercase letter, one lowercase letter, one number, and one special character.
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className="grid gap-6">
                             <div className="grid gap-3">
@@ -155,8 +176,13 @@ export function RegisterForm() {
                                 id="conf-password" type="password" placeholder="Must match the password above." required />
                             </div>
                             <Button
+                                disabled={processing}
                                 onClick={handleSubmit}
-                            >Register</Button>
+                            >
+                            {
+                                processing ? "Registering..." : "Register"
+                            }    
+                            </Button>
                         </CardContent>
                     </Card>
                 </TabsContent>

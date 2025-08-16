@@ -16,7 +16,6 @@ import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname } from "next/navigation"
 import { ModeToggle } from "@/components/ModeToggle"
 import { signOut } from "next-auth/react"
-import { SecureKeyManager } from "@/lib/key-storage";
 
 export function SiteHeader() {
     const { toggleSidebar } = useSidebar()
@@ -28,9 +27,6 @@ export function SiteHeader() {
     // Handle logout with key cleanup
     const handleLogout = async () => {
         try {
-            // Clear the keyEncryptionKey before signing out
-            SecureKeyManager.clearKey();
-            console.log("Encryption key cleared successfully");
             
             // Sign out from NextAuth
             await signOut({

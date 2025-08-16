@@ -7,37 +7,92 @@ import Link from "next/link"
 import { useState } from "react";
 import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
-import { AlertCircleIcon } from "lucide-react";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useAlertActions } from "@/lib/use-alert";
-import { SecureKeyManager } from "@/lib/key-storage";
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"form">) {
     const { showError, showSuccess, showWarning } = useAlertActions();
+    const [verified, setVerified] = useState(false);
+    const [processing, setProcessing] = useState(false);
     const [gstin, setGstin] = useState("")
     const [password, setPassword] = useState("")
     const router = useRouter();
 
-    // Auto-clear error after 3 seconds
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!gstin || !password) {
-            showWarning("Please fill all fields");
+    const verifyGstin = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        setProcessing(true);
+        if (!gstin) {
+            showWarning("Please enter a GST number to login.");
+            setProcessing(false);
             return;
         }
 
         // GSTIN validation
         if (gstin.trim().length !== 15) {
             showError("GST number must be exactly 15 characters long.");
+            setProcessing(false);
+            return;
+        }
+
+        // GST format validation
+        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+        if (!gstRegex.test(gstin.trim())) {
+            showError("Invalid GST number format. Example: 22AAAAA0000A1Z5");
+            setProcessing(false);
+            return;
+        }
+        try {
+            const response = await fetch("/api/auth/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    gstin,
+                }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                showError(data.error || "An error occurred while verifying the GST number.");
+                setProcessing(false);
+                return;
+            }
+            // Store key attributes in localStorage
+            localStorage.setItem("keyAttributes", JSON.stringify(data.keyAttributes));
+            showSuccess("GST number verified successfully!");
+            setVerified(true);
+        } catch (error) {
+            console.error("Login error:", error);
+            showError("An unexpected error occurred. Please try again.");
+        }
+
+        setVerified(true);
+        setProcessing(false);
+    };
+
+    // Auto-clear error after 3 seconds
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setProcessing(true);
+        if (!gstin || !password) {
+            showWarning("Please fill all fields");
+            setProcessing(false);
+            return;
+        }
+
+        // GSTIN validation
+        if (gstin.trim().length !== 15) {
+            showError("GST number must be exactly 15 characters long.");
+            setProcessing(false);
             return;
         }
         // GST format validation
         const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
         if (!gstRegex.test(gstin.trim())) {
             showError("Invalid GST number format. Example: 22AAAAA0000A1Z5");
+            setProcessing(false);
             return;
         }
         
@@ -52,22 +107,13 @@ export function LoginForm({
             if (result?.error) {
                 console.log("Login error:", result.error);
                 showError("Invalid credentials. Please check your GST number and password.");
-            } else {
-                // Generate and store the keyEncryptionKey after successful login
-                try {
-                    await SecureKeyManager.generateAndStoreKey(password);
-                    showSuccess("Login successful! Redirecting...");
-                    setTimeout(() => {
-                        router.push("/dashboard");
-                    }, 1500);
-                } catch (keyError) {
-                    console.error("Error generating encryption key:", keyError);
-                    showError("Login successful but failed to initialize security features.");
-                    setTimeout(() => {
-                        router.push("/dashboard");
-                    }, 2000);
-                }
+                setProcessing(false);
+                return;
             }
+            showSuccess("Login successful! Redirecting...");
+            setTimeout(() => {
+                router.push("/dashboard");
+            }, 3000);
         } catch (error) {
             console.error("Login error:", error);
             showError("An unexpected error occurred. Please try again.");
@@ -89,7 +135,16 @@ export function LoginForm({
                         onChange={(e) => setGstin(e.target.value)}
                         id="gst" type="text" placeholder="Eg. 22AAAAA0000A1Z5" required />
                 </div>
-                <div className="grid gap-3">
+                <div
+                    className={verified ? "hidden" : "block"}
+                >
+                    <Button
+                        onClick={verifyGstin}
+                        className="w-full">
+                        Verify
+                    </Button>
+                </div>
+                <div className={cn("grid gap-3", verified ? "block" : "hidden")}>
                     <div className="flex items-center">
                         <Label htmlFor="password">Password</Label>
                         <a
@@ -106,7 +161,9 @@ export function LoginForm({
                 </div>
                 <Button
                     onClick={handleSubmit}
-                    type="submit" className="w-full">
+                    disabled={!verified || processing}
+                    className={cn("w-full", processing ? "opacity-50 cursor-not-allowed" : "")}
+                >
                     Login
                 </Button>
             </div>
