@@ -12,6 +12,7 @@ import {
   KeyAttributes,
   GenerateKeysAndAttributesResult,
 } from "@/types/keys";
+import { decryptBoxBytes } from "./crypto";
 
 export const deriveKey = async (
   passphrase: string,
@@ -82,6 +83,17 @@ export const encryptBox = async (
   };
 };
 
+
+export const decryptBox = (
+  box: {
+    encryptedData: Uint8Array | string;
+    nonce: Uint8Array | string;
+  },
+  key: Uint8Array | string
+): Promise<string> =>{
+  return decryptBoxBytes(box, key).then(toB64);
+};
+
 export const generateKeyPair = async () => {
   await sodium.ready;
   const keyPair = sodium.crypto_box_keypair();
@@ -105,14 +117,6 @@ export async function generateKeysAndAttributes(
 
   const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
     await encryptBox(masterKey, kek);
-  // const {
-  //   encryptedData: masterKeyEncryptedWithRecoveryKey,
-  //   nonce: masterKeyDecryptionNonce,
-  // } = await encryptBox(masterKey, recoveryKey);
-  // const {
-  //   encryptedData: recoveryKeyEncryptedWithMasterKey,
-  //   nonce: recoveryKeyDecryptionNonce,
-  // } = await encryptBox(recoveryKey, masterKey);
 
   const keyPair = await generateKeyPair();
   const { encryptedData: encryptedSecretKey, nonce: secretKeyDecryptionNonce } =
@@ -127,11 +131,41 @@ export async function generateKeysAndAttributes(
     publicKey: keyPair.publicKey,
     encryptedSecretKey,
     secretKeyDecryptionNonce,
-    // masterKeyEncryptedWithRecoveryKey,
-    // masterKeyDecryptionNonce,
-    // recoveryKeyEncryptedWithMasterKey,
-    // recoveryKeyDecryptionNonce,
   };
 
   return { masterKey, kek, keyAttributes };
 }
+
+export const masterKeyFromSession = async () => {
+  const value = sessionStorage.getItem("encryptionKey");
+  if (!value) return undefined;
+
+  const { encryptedData, key, nonce } = JSON.parse(value);
+  return decryptBox({ encryptedData, nonce }, key);
+};
+
+export const saveKeyInSessionStore = async (keyName: string, keyData: string) => {
+  sessionStorage.setItem(
+    keyName,
+    JSON.stringify(keyData)
+  );
+};
+
+export const generateKEKFromPasswordAndStore = async ({
+  password,
+  salt,
+  opsLimit,
+  memLimit,
+}: {
+  password: string;
+  salt: string;
+  opsLimit: number;
+  memLimit: number;
+}) => {
+  try {
+    const key = await deriveKey(password, salt, opsLimit, memLimit);
+    sessionStorage.setItem("keyEncryptionKey", key);
+  } catch (error) {
+    console.error("Error deriving KEK from password:", error);
+  }
+};

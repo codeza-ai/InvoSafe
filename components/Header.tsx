@@ -12,32 +12,14 @@ import {
 } from "@/components/ui/navigation-menu"
 import { ModeToggle } from "./ModeToggle"
 import Logo from "./Logo";
-import { useSession,signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { handleLogout } from "@/lib/auth";
 
 export function Header() {
     const { data: session } = useSession();
     console.log("Session data:", session);
 
-    // Handle logout with key cleanup
-    const handleLogout = async () => {
-        try {
-            // Clear the keyEncryptionKey before signing out
-            console.log("Encryption key cleared successfully");
-            
-            // Sign out from NextAuth
-            await signOut({
-                callbackUrl: "/login",
-                redirect: true
-            });
-        } catch (error) {
-            console.error("Error during logout:", error);
-            // Still attempt to sign out even if key clearing fails
-            await signOut({
-                callbackUrl: "/login",
-                redirect: true
-            });
-        }
-    };
+    // Use shared logout handler
 
     return (
         <header className="flex items-center justify-center p-4 border-b border-2 border-gray-200 bg-white">
@@ -69,7 +51,7 @@ export function Header() {
                     {session ? (
                         <div className="flex items-center space-x-5 px-5">
                             <Button><Link href="/dashboard">Dashboard</Link></Button>
-                            <Button variant="outline" onClick={handleLogout}>Logout</Button>
+                            <Button variant="outline" onClick={() => handleLogout()}>Logout</Button>
                         </div>
                     ) : (
                         <div className="flex items-center space-x-5 px-5">

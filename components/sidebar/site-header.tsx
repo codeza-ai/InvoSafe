@@ -15,7 +15,8 @@ import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname } from "next/navigation"
 import { ModeToggle } from "@/components/ModeToggle"
-import { signOut } from "next-auth/react"
+
+import { handleLogout } from "@/lib/auth"
 
 export function SiteHeader() {
     const { toggleSidebar } = useSidebar()
@@ -24,24 +25,7 @@ export function SiteHeader() {
     const pathname = usePathname()
     const pathSegments = pathname.split("/").filter(Boolean)
 
-    // Handle logout with key cleanup
-    const handleLogout = async () => {
-        try {
-            
-            // Sign out from NextAuth
-            await signOut({
-                callbackUrl: "/login",
-                redirect: true
-            });
-        } catch (error) {
-            console.error("Error during logout:", error);
-            // Still attempt to sign out even if key clearing fails
-            await signOut({
-                callbackUrl: "/login",
-                redirect: true
-            });
-        }
-    };
+    // Use shared logout handler
 
     return (
         <header className="text-xl bg-background sticky top-0 z-50 flex w-full items-center border-b">
@@ -85,7 +69,7 @@ export function SiteHeader() {
             </div>
             <div className="flex h-(--header-height) w-fit items-center gap-2 px-4">
                 <Button 
-                onClick={handleLogout}
+                onClick={() => handleLogout()}
                 variant={"default"}>
                     Log Out
                 </Button>

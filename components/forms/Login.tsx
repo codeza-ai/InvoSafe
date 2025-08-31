@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { useAlertActions } from "@/lib/use-alert";
+import { decryptBox, generateKEKFromPasswordAndStore, saveKeyInSessionStore } from "@/lib/keys"
 
 export function LoginForm({
     className,
@@ -110,6 +111,43 @@ export function LoginForm({
                 setProcessing(false);
                 return;
             }
+            const keyAttributes = JSON.parse(localStorage.getItem("keyAttributes") || "{}");
+            if (!keyAttributes || Object.keys(keyAttributes).length === 0) {
+                showError("Key attributes not found. Please verify your GST number again.");
+                setProcessing(false);
+                return;
+            }
+
+            await generateKEKFromPasswordAndStore({
+                password,
+                salt: keyAttributes.kekSalt,
+                opsLimit: keyAttributes.opsLimit,
+                memLimit: keyAttributes.memLimit
+            }).catch((error) => {
+                console.error("Error generating KEK from password:", error);
+                showError("Failed to generate key encryption key. Please try again.");
+                setProcessing(false);
+                return;
+            });
+            const kek = sessionStorage.getItem("keyEncryptionKey");
+            if (!kek) {
+                showError("Session expired. Please login again.");
+                setProcessing(false);
+                return;
+            }
+            const masterKey = await decryptBox(
+                {
+                    encryptedData: keyAttributes.encryptedKey,
+                    nonce: keyAttributes.keyDecryptionNonce,
+                },
+                kek,
+            );
+            if (!masterKey) {
+                showError("Failed to decrypt master key. Please check your password.");
+                setProcessing(false);
+                return;
+            }
+            saveKeyInSessionStore("encryptionKey", masterKey);
             showSuccess("Login successful! Redirecting...");
             setTimeout(() => {
                 router.push("/dashboard");

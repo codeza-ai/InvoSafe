@@ -130,3 +130,75 @@ export const generateBlobOrStreamKey = async () => {
   await sodium.ready;
   return toB64(sodium.crypto_secretstream_xchacha20poly1305_keygen());
 };
+
+export async function encryptPdf(pdfBytes: Uint8Array) {
+  // Generate a random key for encryption
+  const invoiceKey = await generateBlobOrStreamKey();
+
+  // Encrypt the PDF bytes
+  const encryptedFile = await encryptStreamBytes(pdfBytes, invoiceKey);
+
+  // Save or transmit encryptedFile.encryptedData and encryptedFile.decryptionHeader
+  return {
+    encryptedData: encryptedFile.encryptedData,
+    decryptionHeader: encryptedFile.decryptionHeader,
+    invoiceKey,
+  };
+}
+
+// Decrypt a PDF file
+export async function decryptPdf(
+  encryptedData: Uint8Array,
+  decryptionHeader: string,
+  invoiceKey: string
+) {
+  // Decrypt the PDF bytes
+  const decryptedBytes = await decryptStreamBytes(
+    { encryptedData, decryptionHeader },
+    invoiceKey
+  );
+
+  // Use decryptedBytes as the original PDF file
+  return decryptedBytes;
+};
+
+// This functio takes invoiceKey, sender's masterKey, recipient's publicKey
+// and returns the encryptedInvoiceKeys object to be stored in the database.
+export const getEncryptedInvoiceKeys = async(invoiceKey: string, masterKey: string, recipientPublicKey: string) => {
+  await sodium.ready;
+  const invoiceKeyBytes = await fromB64(invoiceKey);
+  const masterKeyBytes = await fromB64(masterKey);
+  const recipientPublicKeyBytes = await fromB64(recipientPublicKey);
+
+  // Encrypt invoiceKey with sender's masterKey using crypto_box_seal
+  const primaryInvoiceKeyBytes = sodium.crypto_box_seal(invoiceKeyBytes, masterKeyBytes);
+  const primaryInvoiveKey = await toB64(primaryInvoiceKeyBytes);
+
+  // Encrypt invoiceKey with recipient's publicKey using crypto_box_seal
+  const secondaryInvoiceKeyBytes = sodium.crypto_box_seal(invoiceKeyBytes, recipientPublicKeyBytes);
+  const secondaryInvoieKey = await toB64(secondaryInvoiceKeyBytes);
+
+  return {
+    /**
+     * primaryInvoiceKey: invoiceKey encrypted with sender's masterKey
+     * secondaryInvoiceKey: invoiceKey encrypted with recipient's publicKey
+     */
+    primaryInvoiveKey,
+    secondaryInvoieKey
+  }
+};
+
+export const decryptBoxBytes = async (
+  { encryptedData, nonce }: {
+    encryptedData: Uint8Array | string;
+    nonce: Uint8Array | string;
+  },
+  key: string | Uint8Array
+): Promise<Uint8Array> => {
+  await sodium.ready;
+  return sodium.crypto_secretbox_open_easy(
+    await bytes(encryptedData),
+    await bytes(nonce),
+    await bytes(key)
+  );
+};

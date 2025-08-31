@@ -12,6 +12,7 @@ import { useAlertActions } from "@/lib/use-alert"
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import { FileForm } from "@/components/forms/FileForm"
+import { encryptPdf, getEncryptedInvoiceKeys } from "@/lib/crypto";
 
 export default function Page() {
     const { data: session } = useSession();
@@ -91,7 +92,7 @@ export default function Page() {
             const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
             
             if (invoice.size > maxFileSize) {
-                validationErrors.push("• File size cannot exceed 10MB");
+                validationErrors.push("• File size cannot exceed 5MB");
             }
             
             if (!allowedTypes.includes(invoice.type)) {
@@ -122,6 +123,18 @@ export default function Page() {
             formData.append("senderUserName", senderUserName);
             
             if (invoice) {
+                // const pdfBytes = new Uint8Array(await invoice.arrayBuffer());
+                // const {encryptedData,decryptionHeader,invoiceKey} = await encryptPdf(pdfBytes);
+
+                // const encryptedFile = new File([encryptedData], invoice.name + ".enc", { type: "application/octet-stream" });
+                // const {
+                //     primaryInvoiveKey,
+                //     secondaryInvoieKey
+                // } = await getEncryptedInvoiceKeys(invoiceKey, masterKey, recipientPublicKey);
+                // formData.append("decryptionHeader", decryptionHeader);
+                // formData.append("primaryInvoiveKey", primaryInvoiveKey);
+                // formData.append("secondaryInvoieKey", secondaryInvoieKey);
+                // formData.append("invoiceFile", encryptedFile);
                 formData.append("invoiceFile", invoice);
             }
 
@@ -339,3 +352,4 @@ function DateSelect(
         </Popover>
     )
 }
+

@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import sodium from "libsodium-wrappers-sumo"
+import sodium from "libsodium-wrappers-sumo";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -25,3 +25,7 @@ export const generateDeriveKeySalt = async () => {
   await sodium.ready;
   return toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
 }
+export const generateBlobOrStreamKey = async () => {
+  await sodium.ready;
+  return toB64(sodium.crypto_secretstream_xchacha20poly1305_keygen());
+};

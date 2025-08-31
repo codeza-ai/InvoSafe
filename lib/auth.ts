@@ -1,7 +1,23 @@
+
 import { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/db/connect";
+import { signOut } from "next-auth/react";
+
+// Reusable logout function: clears sessionStorage and signs out
+export async function handleLogout({ callbackUrl = "/login", redirect = true } = {}) {
+  try {
+    if (typeof window !== "undefined") {
+      sessionStorage.clear();
+    }
+    await signOut({ callbackUrl, redirect });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    // Still attempt to sign out even if sessionStorage clearing fails
+    await signOut({ callbackUrl, redirect });
+  }
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -118,3 +134,5 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET, // Secret for signing tokens
 };
+
+
