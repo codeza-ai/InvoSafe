@@ -75,9 +75,7 @@ export function RegisterForm() {
             setProcessing(false);
             return;
         }
-        // Add your form submission logic here, e.g., API call to register user
-        localStorage.setItem("masterKey", keysAndAttributes.masterKey);
-        console.log("Master key stored in localStorage for session:", keysAndAttributes.masterKey);
+
         const response = await fetch("/api/auth/register", {
             method: "POST",
             headers: {

@@ -147,7 +147,7 @@ export const masterKeyFromSession = async () => {
 export const saveKeyInSessionStore = async (keyName: string, keyData: string) => {
   sessionStorage.setItem(
     keyName,
-    JSON.stringify(keyData)
+    keyData
   );
 };
 

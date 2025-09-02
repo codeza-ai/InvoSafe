@@ -12,6 +12,10 @@ export const InvoiceSchema = z.object({
     title: z.string().min(1).max(100),
     description: z.string().max(500).optional(),
     invoice_number: z.string().min(1).max(50),
+    primary_invoice_key: z.string().optional().nullable(),
+    secondary_invoice_key: z.string().optional().nullable(),
+    decryption_header: z.string().optional().nullable(),
+    // file_path: z.string().url().optional().nullable(),
 });
 
 export type Invoice = z.infer<typeof InvoiceSchema>;

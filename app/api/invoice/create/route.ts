@@ -27,6 +27,9 @@ export async function POST(req: NextRequest) {
     const invoiceDate = formData.get("invoiceDate") as string;
     const file = formData.get("invoiceFile") as File;
     const senderUserName = formData.get("senderUserName") as string;
+    const primaryKey = formData.get("primaryInvoiceKey") as string;
+    const secondaryKey = formData.get("secondaryInvoiceKey") as string;
+    const decryptionHeader = formData.get("decryptionHeader") as string;
 
     // Generate unique invoice ID
     const invoiceId = crypto.randomUUID();
@@ -53,8 +56,12 @@ export async function POST(req: NextRequest) {
       sender_name: senderUserName,
       recipient_name: receiverUser.business_name,
       title: title,
-      description: description || null,
+      description: description || undefined,
       invoice_number: invoiceNumber,
+      primary_invoice_key: primaryKey || undefined,
+      secondary_invoice_key: secondaryKey || undefined,
+      decryption_header: decryptionHeader || undefined,
+      // file_path: file ? "https://fxlianxlwekzkiqarlev.supabase.co/storage/v1/object/public/invoices/" + senderGstin + "/" + invoiceId + `.${file.name.split('.').pop()}` : null,
     };
 
     // Validate data with Zod schema

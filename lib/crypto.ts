@@ -172,20 +172,20 @@ export const getEncryptedInvoiceKeys = async(invoiceKey: string, masterKey: stri
 
   // Encrypt invoiceKey with sender's masterKey using crypto_box_seal
   const primaryInvoiceKeyBytes = sodium.crypto_box_seal(invoiceKeyBytes, masterKeyBytes);
-  const primaryInvoiveKey = await toB64(primaryInvoiceKeyBytes);
+  const primaryInvoiceKey = await toB64(primaryInvoiceKeyBytes);
 
   // Encrypt invoiceKey with recipient's publicKey using crypto_box_seal
   const secondaryInvoiceKeyBytes = sodium.crypto_box_seal(invoiceKeyBytes, recipientPublicKeyBytes);
-  const secondaryInvoieKey = await toB64(secondaryInvoiceKeyBytes);
+  const secondaryInvoiceKey = await toB64(secondaryInvoiceKeyBytes);
 
   return {
     /**
      * primaryInvoiceKey: invoiceKey encrypted with sender's masterKey
      * secondaryInvoiceKey: invoiceKey encrypted with recipient's publicKey
      */
-    primaryInvoiveKey,
-    secondaryInvoieKey
-  }
+    primaryInvoiceKey,
+    secondaryInvoiceKey,
+  };
 };
 
 export const decryptBoxBytes = async (

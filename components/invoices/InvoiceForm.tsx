@@ -11,7 +11,7 @@ import { useSession } from "next-auth/react";
 import { FileForm } from "@/components/forms/FileForm";
 import { DateSelect } from "@/components/ui/DateSelect";
 import { validateInvoiceForm } from "@/lib/invoice-validation";
-
+import { encryptPdf, getEncryptedInvoiceKeys }from "@/lib/crypto";
 export function InvoiceForm() {
     const { data: session } = useSession();
     const { showError, showSuccess, showWarning } = useAlertActions();
@@ -25,11 +25,47 @@ export function InvoiceForm() {
     const [title, setTitle] = useState("");
     const [invoiceNumber, setInvoiceNumber] = useState("");
     const [description, setDescription] = useState("");
+    const [recipientVerified, setRecipientVerified] = useState(false);
+
     const senderGstNumber = session?.user?.gstin || "";
     const senderUserName = session?.user?.business_name || "";
 
+    const verifyRecipient = async(receiverGstin : string)=>{
+        // GST Number format validation
+        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[0-9A-Z]{4}$/;
+        if (receiverGstin.trim() && !gstRegex.test(receiverGstin.trim())) {
+            setErrors([
+                "• Invalid GST Number format (should be 15 characters: 02AAAAA0000A1Z5)"
+            ]);
+            return;
+        }
+        try {
+            const response = await fetch("/api/user/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ gstin: receiverGstin }),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                setRecipientVerified(true);
+                sessionStorage.setItem("recipientInfo", JSON.stringify(result.recipient));
+                showSuccess("Receiver GSTIN verified successfully!");
+            } else {
+                showError(result.error || "Failed to verify receiver GSTIN");
+            }
+        }catch(error){
+            console.error("Error verifying GSTIN:", error);
+            showError("An error occurred while verifying the GSTIN");
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if(!recipientVerified){
+            setErrors(["Please verify the receiver GSTIN before submitting the form."]);
+        }
         const validationErrors = validateInvoiceForm({
             senderGstNumber,
             senderUserName,
@@ -62,21 +98,50 @@ export function InvoiceForm() {
             formData.append("description", description.trim());
             formData.append("invoiceDate", date!.toISOString());
             formData.append("senderUserName", senderUserName);
+            
             if (invoice) {
-                // const pdfBytes = new Uint8Array(await invoice.arrayBuffer());
-                // const {encryptedData,decryptionHeader,invoiceKey} = await encryptPdf(pdfBytes);
+                const pdfBytes = new Uint8Array(await invoice.arrayBuffer());
+                const {encryptedData,decryptionHeader,invoiceKey} = await encryptPdf(pdfBytes);
 
-                // const encryptedFile = new File([encryptedData], invoice.name + ".enc", { type: "application/octet-stream" });
-                // const {
-                //     primaryInvoiveKey,
-                //     secondaryInvoieKey
-                // } = await getEncryptedInvoiceKeys(invoiceKey, masterKey, recipientPublicKey);
-                // formData.append("decryptionHeader", decryptionHeader);
-                // formData.append("primaryInvoiveKey", primaryInvoiveKey);
-                // formData.append("secondaryInvoieKey", secondaryInvoieKey);
-                // formData.append("invoiceFile", encryptedFile);
-                formData.append("invoiceFile", invoice);
+                // Fix: Ensure encryptedData is a valid BlobPart by slicing its ArrayBuffer
+                const encryptedFile = new File([encryptedData.slice(0)], invoice.name + ".enc", { type: "application/octet-stream" });
+                const recipientInfo = sessionStorage.getItem("recipientInfo");
+
+                if (!recipientInfo) {
+                    showError("Recipient information not found. Please verify the receiver GSTIN again.");
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                const { publicKey: recipientPublicKey } = JSON.parse(recipientInfo);
+                const masterKey = sessionStorage.getItem("encryptionKey");
+                if (!masterKey) {
+                    showError("Master key not found. Please log in again.");
+                    setIsSubmitting(false);
+                    return;
+                }
+                console.log("Encrypting invoice keys for recipient...");
+                console.log("invoiceKey:", invoiceKey);
+                console.log("masterKey:", masterKey);
+                console.log("recipientPublicKey:", recipientPublicKey);
+
+                if (!invoiceKey || !masterKey || !recipientPublicKey) {
+                    showError("Encryption keys missing or invalid. Please verify and try again.");
+                    setIsSubmitting(false);
+                    return;
+                }
+                const {
+                    primaryInvoiceKey,
+                    secondaryInvoiceKey
+                } = await getEncryptedInvoiceKeys(invoiceKey, masterKey, recipientPublicKey);
+                console.log("Encrypted invoice keys generated.");
+                formData.append("decryptionHeader", decryptionHeader);
+                formData.append("primaryInvoiceKey", primaryInvoiceKey);
+                formData.append("secondaryInvoiceKey", secondaryInvoiceKey);
+                formData.append("invoiceFile", encryptedFile);
+                // formData.append("invoiceFile", invoice);
             }
+            console.log("Submitting invoice creation form...");
             const response = await fetch("/api/invoice/create", {
                 method: "POST",
                 body: formData,
@@ -125,7 +190,6 @@ export function InvoiceForm() {
                             </ul>
                         </div>
                     )}
-                    <form onSubmit={handleSubmit}>
                         <div className="flex mb-3 items-baseline">
                             <div className="grid w-1/2 items-center gap-3 pr-3">
                                 <Label htmlFor="gstin">Sender GST Number</Label>
@@ -134,16 +198,13 @@ export function InvoiceForm() {
                                         value={senderGstNumber}
                                         readOnly
                                         id="gstin" type="text" placeholder="GST Number" />
-                                    <Button
-                                        variant={"default"}
-                                        disabled
-                                    >Verify</Button>
                                 </div>
                             </div>
                             <div className="grid w-1/2 items-center gap-3">
                                 <Label htmlFor="receiver-gstin">Receiver GST Number * (15 chars)</Label>
                                 <div className="flex items-center gap-2 w-full">
                                     <Input
+                                        readOnly={recipientVerified}
                                         id="receiver-gstin"
                                         type="text"
                                         required
@@ -153,12 +214,18 @@ export function InvoiceForm() {
                                         className={receiverGstNumber.length > 0 && receiverGstNumber.length !== 15 ? "border-red-500" : ""}
                                         maxLength={15}
                                     />
+                                    <Button
+                                        variant={"default"}
+                                        disabled={receiverGstNumber.length !== 15 || recipientVerified}
+                                        onClick={async() => await verifyRecipient(receiverGstNumber)}
+                                    >Verify</Button>
                                 </div>
                                 <div className="text-xs text-gray-500">
                                     {receiverGstNumber.length}/15 characters
                                 </div>
                             </div>
                         </div>
+                    <form onSubmit={handleSubmit}>
                         <div className="flex mb-3">
                             <div className="grid w-1/3 items-center gap-3 mr-3">
                                 <Label htmlFor="invoice">Invoice File</Label>
@@ -242,7 +309,7 @@ export function InvoiceForm() {
                     <Button
                         type="submit"
                         className="w-full"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !recipientVerified}
                         onClick={handleSubmit}
                     >
                         {isSubmitting ? "Creating Invoice..." : "Generate Invoice"}
