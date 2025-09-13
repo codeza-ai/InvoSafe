@@ -1,6 +1,6 @@
 import {z} from 'zod';
 
-export const InvoiceSchema = z.object({
+export const FetchedInvoiceSchema = z.object({
     invoice_id : z.string().uuid(),
     sender_gstin: z.string().min(15).max(15),
     recipient_gstin: z.string().min(15).max(15),
@@ -16,7 +16,8 @@ export const InvoiceSchema = z.object({
     secondary_invoice_key: z.string().optional().nullable(),
     decryption_header: z.string().optional().nullable(),
     // file_path: z.string().url().optional().nullable(),
+    created_at: z.string().datetime().optional(),
 });
 
 
-export type Invoice = z.infer<typeof InvoiceSchema>;
+export type FetchedInvoice = z.infer<typeof FetchedInvoiceSchema>;

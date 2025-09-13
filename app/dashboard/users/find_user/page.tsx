@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { UserType } from "@/db/types/user";
 import User from "@/components/User";
 import { useAlertActions } from "@/lib/use-alert";

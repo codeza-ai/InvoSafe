@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import  {InputOTPForm} from "./OTPForm"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,7 +22,6 @@ import {
 import { useAlertActions } from "@/lib/use-alert";
 import { useRouter } from "next/navigation";
 import { generateKeysAndAttributes } from "@/lib/keys";
-import { set } from "zod";
 
 export function RegisterForm() {
     const [processing, setProcessing] = useState(false);

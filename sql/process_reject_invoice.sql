@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION process_reject_invoice(
 RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
   result JSON;
@@ -83,4 +84,4 @@ $$;
 
 -- Grant execute permission to the service role
 -- Replace 'service_role' with your actual service role name if different
-GRANT EXECUTE ON FUNCTION register_user_with_keys TO service_role;
+GRANT EXECUTE ON FUNCTION process_reject_invoice TO postgres;

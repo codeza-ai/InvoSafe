@@ -12,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react";
-import { set } from "zod";
 export function FileForm(
     {setInvoice, name}:
     { setInvoice: (file: File) => void,

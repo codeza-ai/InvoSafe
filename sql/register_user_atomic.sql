@@ -22,6 +22,7 @@ CREATE OR REPLACE FUNCTION register_user_with_keys(
 RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
   result JSON;

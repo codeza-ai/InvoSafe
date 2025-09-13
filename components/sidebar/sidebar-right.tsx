@@ -36,10 +36,10 @@ export function SidebarRight({
             <SidebarContent
                 className="gap-0"
             >
-                <Calendar
+                {/* <Calendar
                     mode="single"
                     captionLayout="dropdown"
-                />
+                /> */}
                 <SidebarSeparator className="mx-0" />
             </SidebarContent>
             <SidebarFooter>
