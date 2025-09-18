@@ -1,12 +1,11 @@
 'use client';
 
-import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useAlertActions } from "@/lib/use-alert";
 import { FetchedInvoice } from "@/db/types/fetched";
-
+import { decryptPdf, decryptPrimaryInvoiceKey, decryoptSecondaryInvoiceKey } from "@/lib/crypto";
 export default function Home() {
     // const router = useRouter();
     const { invoice_id } = useParams();
@@ -14,7 +13,7 @@ export default function Home() {
     const [senderId, setSenderId] = useState(null)
     const { showError, showSuccess, showWarning } = useAlertActions();
     const [invoiceDetails, setInvoiceDetails] = useState<FetchedInvoice | null>(null);
-    const [invoiceFile, setInvoiceFile] = useState(null);
+    const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
     // const [encryptedFile, setEncryptedFile] = useState<File | null>();
     const [isFetching, setIsFetching] = useState(false);
 
@@ -36,8 +35,83 @@ export default function Home() {
         const encryptedBlob = await fetchEncryptedBlob();
         if(!encryptedBlob)return;
 
+        const arrayBuffer = await encryptedBlob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const header = invoiceDetails?.decryption_header;
+        if (!header) {
+            showError("Decryption header not found for the invoice.");
+            return;
+        }  
+        const masterKey = sessionStorage.getItem('masterKey');
+        if(!masterKey){
+            showError("Master key not found in session. Please login again.");
+            return;
+        }
+        const keyAttributes = JSON.parse(localStorage.getItem("keyAttributes") || "{}");
+        if (!keyAttributes || Object.keys(keyAttributes).length === 0) {
+            showError("Key attributes not found. Please verify your GST number again.");
+            return;
+        }
         // If the user is sender, use primary key else use secondary key
-    
+        if (invoiceDetails?.sender_gstin === gstin) {
+            // Decrypt using primary key
+            const primaryKey = invoiceDetails?.primary_invoice_key;
+            if(!primaryKey){
+                showError("Primary invoice key not found.");
+                return;
+            }
+            const invoiceKey = await decryptPrimaryInvoiceKey(primaryKey, masterKey);
+            if(!invoiceKey){
+                showError("Failed to decrypt invoice key. Please check your master key.");
+                return;
+            }
+                      
+            const decryptedFile = await decryptPdf(uint8Array, header,  invoiceKey);
+            if(!decryptedFile){
+                showError("Failed to decrypt invoice file.");
+                return;
+            }
+            const file = new File([decryptedFile.slice(0)], `${invoice_id}.pdf`, { type: 'application/pdf' });
+            if(!file){
+                showError("Failed to create file from decrypted data.");
+                return;
+            }
+            setInvoiceFile(file);
+            showSuccess("Invoice file decrypted successfully.");
+        } else if (invoiceDetails?.recipient_gstin === gstin){
+            // Decrypt using secondary key
+            const secondaryKey = invoiceDetails?.secondary_invoice_key;
+            if(!secondaryKey){
+                showError("Secondary invoice key not found.");
+                return;
+            }
+            const recipientPrivateKey = sessionStorage.getItem('secretKey');
+            const recipientPublicKey = keyAttributes.publicKey;
+            if(!recipientPrivateKey || !recipientPublicKey){
+                showError("Recipient keys not found in session. Please login again.");
+                return;
+            }
+
+            const invoiceKey = await decryoptSecondaryInvoiceKey(secondaryKey, recipientPrivateKey, recipientPublicKey);
+            if(!invoiceKey){
+                showError("Failed to decrypt invoice key. Please check your keys.");
+                return;
+            }
+            const decryptedFile = await decryptPdf(uint8Array, header,  invoiceKey);
+            if(!decryptedFile){
+                showError("Failed to decrypt invoice file.");
+                return;
+            }
+            const file = new File([decryptedFile.slice(0)], `${invoice_id}.pdf`, { type: 'application/pdf' });
+            if(!file){
+                showError("Failed to create file from decrypted data.");
+                return;
+            }
+            setInvoiceFile(file);
+            showSuccess("Invoice file decrypted successfully.");
+        }else{
+            showError("You are not authorized to access the file.");
+        }
     }
     async function getInvoiceDetails() {
         // Fetch invoice details from your API

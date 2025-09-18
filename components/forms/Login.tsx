@@ -147,7 +147,21 @@ export function LoginForm({
                 setProcessing(false);
                 return;
             }
+            const privateKey = await decryptBox(
+                {
+                    encryptedData: keyAttributes.encryptedSecretKey,
+                    nonce: keyAttributes.secretKeyDecryptionNonce,
+                },
+                kek,
+            )
+            if (!privateKey) {
+                showError("Failed to decrypt private key. Please check your password or try again.");
+                setProcessing(false);
+                return;
+            }
+
             saveKeyInSessionStore("encryptionKey", masterKey);
+            saveKeyInSessionStore("secretKey", privateKey);
             showSuccess("Login successful! Redirecting...");
             setTimeout(() => {
                 router.push("/dashboard");

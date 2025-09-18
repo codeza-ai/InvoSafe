@@ -38,7 +38,6 @@ export interface EncryptedFile {
 // call to encryptStreamBytes or decryptStreamBytes.
 export const streamEncryptionChunkSize = 4 * 1024 * 1024;
 
-
 // Merge multiple Uint8Arrays into a single Uint8Array.
 // This is a more efficient alternative to using Array.prototype.concat.
 export const mergeUint8Arrays = (as: Uint8Array[]): Uint8Array => {
@@ -52,41 +51,41 @@ export const mergeUint8Arrays = (as: Uint8Array[]): Uint8Array => {
 };
 
 export const encryptStreamBytes = async (
-    data: Uint8Array,
-    key: string | Uint8Array,
+  data: Uint8Array,
+  key: string | Uint8Array
 ): Promise<EncryptedFile> => {
-    await sodium.ready;
+  await sodium.ready;
 
-    const keyBytes = await bytes(key);
-    const initPushResult =
-        sodium.crypto_secretstream_xchacha20poly1305_init_push(keyBytes);
-    const [pushState, header] = [initPushResult.state, initPushResult.header];
-    let bytesRead = 0;
-    let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
+  const keyBytes = await bytes(key);
+  const initPushResult =
+    sodium.crypto_secretstream_xchacha20poly1305_init_push(keyBytes);
+  const [pushState, header] = [initPushResult.state, initPushResult.header];
+  let bytesRead = 0;
+  let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
 
-    const encryptedChunks = [];
+  const encryptedChunks = [];
 
-    while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
-        let chunkSize = streamEncryptionChunkSize;
-        if (bytesRead + chunkSize >= data.length) {
-            chunkSize = data.length - bytesRead;
-            tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL;
-        }
-
-        const buffer = data.slice(bytesRead, bytesRead + chunkSize);
-        bytesRead += chunkSize;
-        const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
-            pushState,
-            buffer,
-            null,
-            tag,
-        );
-        encryptedChunks.push(pushResult);
+  while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
+    let chunkSize = streamEncryptionChunkSize;
+    if (bytesRead + chunkSize >= data.length) {
+      chunkSize = data.length - bytesRead;
+      tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL;
     }
-    return {
-        encryptedData: mergeUint8Arrays(encryptedChunks),
-        decryptionHeader: await toB64(header),
-    };
+
+    const buffer = data.slice(bytesRead, bytesRead + chunkSize);
+    bytesRead += chunkSize;
+    const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
+      pushState,
+      buffer,
+      null,
+      tag
+    );
+    encryptedChunks.push(pushResult);
+  }
+  return {
+    encryptedData: mergeUint8Arrays(encryptedChunks),
+    decryptionHeader: await toB64(header),
+  };
 };
 
 /**
@@ -160,22 +159,36 @@ export async function decryptPdf(
 
   // Use decryptedBytes as the original PDF file
   return decryptedBytes;
-};
+}
 
 // This functio takes invoiceKey, sender's masterKey, recipient's publicKey
 // and returns the encryptedInvoiceKeys object to be stored in the database.
-export const getEncryptedInvoiceKeys = async(invoiceKey: string, masterKey: string, recipientPublicKey: string) => {
+export const getEncryptedInvoiceKeys = async (
+  invoiceKey: string,
+  masterKey: string,
+  recipientPublicKey: string
+) => {
   await sodium.ready;
   const invoiceKeyBytes = await fromB64(invoiceKey);
   const masterKeyBytes = await fromB64(masterKey);
   const recipientPublicKeyBytes = await fromB64(recipientPublicKey);
 
-  // Encrypt invoiceKey with sender's masterKey using crypto_box_seal
-  const primaryInvoiceKeyBytes = sodium.crypto_box_seal(invoiceKeyBytes, masterKeyBytes);
-  const primaryInvoiceKey = await toB64(primaryInvoiceKeyBytes);
+  // Encrypt invoiceKey with sender's masterKey using symmetric encryption (secretbox)
+  const nonce = masterKeyBytes.slice(0, sodium.crypto_secretbox_NONCEBYTES);
+  const primaryInvoiceKeyBytes = sodium.crypto_secretbox_easy(
+    invoiceKeyBytes,
+    nonce,
+    masterKeyBytes
+  );
+  const primaryInvoiceKey = await toB64(
+    mergeUint8Arrays([nonce, primaryInvoiceKeyBytes])
+  );
 
   // Encrypt invoiceKey with recipient's publicKey using crypto_box_seal
-  const secondaryInvoiceKeyBytes = sodium.crypto_box_seal(invoiceKeyBytes, recipientPublicKeyBytes);
+  const secondaryInvoiceKeyBytes = sodium.crypto_box_seal(
+    invoiceKeyBytes,
+    recipientPublicKeyBytes
+  );
   const secondaryInvoiceKey = await toB64(secondaryInvoiceKeyBytes);
 
   return {
@@ -188,8 +201,70 @@ export const getEncryptedInvoiceKeys = async(invoiceKey: string, masterKey: stri
   };
 };
 
+export const decryptPrimaryInvoiceKey = async (
+  primaryInvoiceKey: string,
+  masterKey: string
+) => {
+  try {
+    await sodium.ready;
+    const primaryInvoiceKeyBytes = await fromB64(primaryInvoiceKey);
+    const masterKeyBytes = await fromB64(masterKey);
+
+    // Extract nonce and ciphertext
+    const nonceBytes = primaryInvoiceKeyBytes.slice(
+      0,
+      sodium.crypto_secretbox_NONCEBYTES
+    );
+    const ciphertext = primaryInvoiceKeyBytes.slice(
+      sodium.crypto_secretbox_NONCEBYTES
+    );
+
+    // Decrypt
+    const invoiceKeyBytes = sodium.crypto_secretbox_open_easy(
+      ciphertext,
+      nonceBytes,
+      masterKeyBytes
+    );
+    if (!invoiceKeyBytes) {
+      throw new Error("Decryption failed");
+    }
+    const invoiceKey = await toB64(invoiceKeyBytes);
+    return invoiceKey;
+  } catch (err) {
+    console.log("Error decrypting primary key:", err);
+    return null;
+  }
+};
+
+export const decryoptSecondaryInvoiceKey = async (
+  secondaryInvoiceKey: string,
+  privateKey: string,
+  publicKey: string
+) => {
+  await sodium.ready;
+  try {
+    const secondaryInvoiceKeyBytes = await fromB64(secondaryInvoiceKey);
+    const privateKeyBytes = await fromB64(privateKey);
+    const publicKeyBytes = await fromB64(privateKey);
+    const invoiceKeyBytes = sodium.crypto_box_seal_open(
+      secondaryInvoiceKeyBytes,
+      publicKeyBytes,
+      privateKeyBytes
+    );
+    const invoiceKey = await toB64(invoiceKeyBytes);
+
+    return invoiceKey;
+  } catch (err) {
+    console.log("Error decrypting primary key:", err);
+    return null;
+  }
+};
+
 export const decryptBoxBytes = async (
-  { encryptedData, nonce }: {
+  {
+    encryptedData,
+    nonce,
+  }: {
     encryptedData: Uint8Array | string;
     nonce: Uint8Array | string;
   },
